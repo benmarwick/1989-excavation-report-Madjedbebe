@@ -4,8 +4,8 @@
 ```{r load-data}
 # assumes you've set the directory earlier when running the
 # code for lithicsing, if not, uncomment and uplithicse this next line
-directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/data/"
-lithics <- read.csv(paste0(directory, "Lithics_table_from_paper_on_1989_dig.csv"))
+directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/"
+lithics <- read.csv(paste0(directory, "data/Lithics_table_from_paper_on_1989_dig.csv"))
 ```
 
 
@@ -205,17 +205,5 @@ ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = raw
   theme_minimal(base_size = 16)
 
 # save plot as SVG for finessing...
-ggsave(file="F:\\My Documents\\My UW\\Research\\1206 M2 excavation\\Dating\\MKII_lithics_from_1989_for_paper.svg")
-
-
-testdata <- data.frame(var1 = 1:10, var2 = 1:10) 
-ggplot(data = testdata, mapping = aes(x = var1, y = var2)) +
-  geom_line() + 
-  scale_x_continuous(limits = c(1, 10),
-  breaks = c(1, 1.5, 2, 3, 4, 4.5, 5, 6, 7, 7.5, 8, 9, 10), 
-  labels = c('A', '\n1', 'B', '\n2', 'C', '\n3', 'D', '\n4',
-                                'E', '\n5', 'F', '\n6', 'G')) +
-  opts(panel.grid.major = theme_blank(), panel.grid.minor = theme_blank()) +
-  geom_vline(xintercept = c(1, 2, 4, 5, 7, 8, 10), colour = 'white') +
-  geom_hline(yintercept = c(2, 4, 6, 8, 10), colour = 'white') +
- geom_line()  + opts(axis.ticks = theme_blank())
+ggsave(file = paste0(directory, "figures/lithics_proportions_from_1989_for_paper.svg"))
+```
