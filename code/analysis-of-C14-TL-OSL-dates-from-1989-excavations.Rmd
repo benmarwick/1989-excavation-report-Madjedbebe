@@ -1,0 +1,439 @@
+---
+title: ""
+author: Ben Marwick
+date: Thursday, June 26, 2014
+output: html_document
+---
+
+# Analysis of dates from the 1989 excavations at Madjebebe (Malakanunja II)
+
+```{r read-in-data}
+# plot all dates for 1989 paper, colour by method
+# raw data from text table in....
+directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/data"
+dates_1989 <- read.csv(paste0(directory, "/Date_table_from_paper_on_1989_dig.csv"))
+```
+
+
+```{r clean-up}
+# clean up depth, where there's a range, get midpoint
+# get depths with ranges, ie nn-nn
+depthwithrange <- as.character(dates_1989$Depth.cm [grepl("-", dates_1989$Depth.cm )])
+# find midpoint
+midpoint <- unlist(lapply(depthwithrange, function(i) abs(eval(parse(text= i)))))/2 + # get half of range
+as.numeric(gsub("-.*", "", depthwithrange)) # depth value 
+# replace depth with range with single depth value
+dates_1989$Depth.cm <- as.character(dates_1989$Depth.cm)
+dates_1989$Depth.cm[grep("-", dates_1989$Depth.cm)] <- midpoint
+dates_1989$Depth.m <- as.numeric(dates_1989$Depth.cm)/100 # in meters
+
+# get the median value from OxCal output
+oxcal_medians <- read.csv(paste0(directory, "/Date_table_from_paper_on_1989_dig_C14_OxCal_output.csv"))
+
+# get lab sample ID for matching
+matching <- c("R_Date", " ")
+oxcal_medians$Name <- gsub(paste(matching, collapse = "|"), "", oxcal_medians$Name)
+
+# get rid of spaces and convert to same type
+dates_1989$Lab.Code <- as.character(gsub(" ", "", dates_1989$Lab.Code))
+dates_1989$Method <- as.character(gsub(" ", "", dates_1989$Method))
+
+dates_1989_with_C14_medians <- merge(x = dates_1989, 
+      y = oxcal_medians, 
+      by.x = "Lab.Code", 
+      by.y = "Name",
+      all = TRUE)
+# remove header row
+dates_1989_with_C14_medians <- dates_1989_with_C14_medians[-1,]
+
+# in kya
+dates_1989_with_C14_medians$age2plot <- (ifelse(dates_1989_with_C14_medians$Method == "TL"|dates_1989_with_C14_medians$Method == "OSL", dates_1989_with_C14_medians$Uncalibrated.Age, ifelse(dates_1989_with_C14_medians$Method == "C14"| dates_1989_with_C14_medians$Method == "ABOX", as.numeric(as.character(dates_1989_with_C14_medians$X.3)), NA)))/1000
+
+# simplify object name
+dates_1989 <- dates_1989_with_C14_medians
+
+# interpolate age from loess line with depth
+# this is for the lines that show oldest artefact, etc.
+cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),] , span = 0.4) # exclude ABOX dates
+cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 5, 0.01)))
+plot(cal.date.pr)
+cal.date.pr <- data.frame(age = cal.date.pr, depth = names(cal.date.pr))
+# determine an age from a known depth
+i = 287 # depth in cm, to the nearest 1 cm: oldest artefacts
+oldest <- cal.date.pr[cal.date.pr$depth == i,]$age # returns age from loess
+i = 250 # depth in cm, to the nearest 1 cm: base of dense artefacts
+dense <- cal.date.pr[cal.date.pr$depth == i,]$age # returns age from loess
+
+
+library(ggplot2)
+limits <- aes(ymax = age2plot  + Error/1000, ymin = age2plot  - Error/1000, colour = factor(Method))
+library(scales) # needed for axis number format
+ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) + 
+  # add loess line that excludes the ABOX dates
+  geom_smooth(data =  dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]  , method = "loess", se = FALSE, span = 0.4, colour = "grey", alpha = 0.2, size = 1) +
+  # set point size, colour and shape
+  geom_point(size = 2, aes(colour = factor(Method), shape = factor(Method))) + 
+  # add error bars
+  geom_linerange(limits, width=0.5) +
+  # add lab codes as point labels
+  geom_text(angle = 0,  hjust = -0.2, vjust = 0.2, size = 2) +
+  # Edit axis labels
+  xlab("meters below surface") + ylab("x 1000 years cal. BP") +
+  # scale title
+  scale_colour_discrete(name  ="Dating\nmethod" ) + 
+  scale_shape_discrete(name  ="Dating\nmethod" ) +
+  # format y axis for readability
+  scale_y_continuous(labels = comma, breaks = seq(0,100,20)) + 
+  scale_x_reverse() + # top to bottom of the trench
+  # lines for lowest artefacts at 2.8 m
+  geom_segment(aes(x = 2.8, y = oldest, xend = 4.75, yend = oldest), colour = "grey30") +
+  geom_segment(aes(x = 2.8, y = 0, xend = 2.8, yend = oldest), , colour = "grey30") +
+  annotate("text", x = 2.9, y = 21, label = paste0("lowest artefacts (", round(oldest,0), " ka BP)"), size = 3) +
+  # lines for dense concentration at 2.5 m
+  geom_segment(aes(x = 2.5, y = dense, xend = 4.75, yend = dense), colour = "grey30") +
+  geom_segment(aes(x = 2.5, y = 0, xend = 2.5, yend = dense), , colour = "grey30") +
+  annotate("text", x = 2.2, y = 15, label = paste0("base of dense \noccupation layer (", round(dense,0), " ka BP)"), size = 3) +
+  
+  theme_bw() +
+  coord_flip() + # rotate
+  # format non-data elements
+  theme(# panel.background = element_blank(),        # suppress default background
+    # panel.grid.major = element_blank(),            # suppress default major gridlines
+    # panel.grid.minor = element_blank(),            # suppress default minor gridlines
+    # axis.ticks = element_blank(),                  # suppress tick marks
+    axis.title.x=element_text(size=17),              # increase axis title size slightly  
+    axis.title.y=element_text(size=17, angle=90),    # increase axis title size slightly and rotate
+    axis.text.x=element_text(size=15, colour = "black"),    # increase size of numbers on x-axis
+    axis.text.y=element_text(size=15, colour = "black"))    # increase size of numbers on y-axis
+#  aspect.ratio=0.5 )                                 # make the plot square-ish
+
+
+# save plot as SVG for finessing...
+ggsave(file=paste0(directory, "MKII_dates_from_1989_for_paper.svg"), width = 200, height = 200, units = "mm")
+# the some minor edits in inkscape to make the data point labels more readable
+```
+
+```{r difference-in-slope}
+# Looking into the question of difference in slope of 
+# regression lines using data from 1989
+
+
+# separate OSL and C14 dates to test for slope for paper on 1989 data
+OSL <- dates_1989[grepl("TL", dates_1989$Method),]
+C14 <- dates_1989[!grepl("TL", dates_1989$Method),]
+
+# investigate regressions of depth-age by method
+summary(m1 <- aov( Depth.m ~ age2plot * Method, data = dates_1989))
+# significant difference interaction, These results suggest that the slope of the regression between date and depth width is not similar for the two dating methods. 
+
+# more parsimonious model is fit without the interaction to test for a significant differences in the slope. 
+summary(m2 <- aov( Depth.m ~ age2plot + Method, data = dates_1989))
+
+anova(m1,m2)
+# removing the interaction DOES significantly affect the fit of the model.  We observe that for the dates, the method has a significant and positive effect on age and the effect is different for C14 and OSL 
+
+summary(OSL_mod <- lm(age2plot ~ Depth.m, data=OSL)) # slope 24658 err 2150
+summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) # slope 8016  err 1394 
+# diff in slopes over
+# the standard error of the difference between the two slopes
+
+# plot
+library(ggplot2)
+ggplot(dates_1989, aes(age2plot, Depth.m, colour = Method)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = 14) +
+  scale_y_reverse()
+
+# now limit to upper 178 cm
+upper <- dates_1989[dates_1989$Depth.m < 1.78, ]
+
+# separate OSL and C14 dates to test for slope
+upper$Method <- ifelse(grepl("TL", upper$Method), "OSL", "C14")
+OSL <- upper[grepl("OSL", upper$Method),]
+C14 <- upper[!grepl("OSL", upper$Method),]
+
+# investigate regressions of depth-age by method
+# from http://r-eco-evo.blogspot.com/2011/08/comparing-two-regression-slopes-by.html
+summary(m1 <- aov( Depth.m ~ age2plot * Method, data = upper))
+# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
+
+# more parsimonious model is fit without the interaction to test for a significant differences in the slope. 
+summary(m2 <- aov( Depth.m ~ age2plot + Method, data = upper))
+
+anova(m1,m2)
+# removing the interaction DOES NOT significantly affect the fit of the model.  We observe that for the dates, the method has a NO significant  effect on age and the effect is NOT different for C14 and OSL 
+
+# Is there a difference in slopes of the regression line in the 
+# two methods
+# this approach is from http://core.ecu.edu/psyc/wuenschk/docs30/CompareCorrCoeff.pdf
+summary(OSL_mod <- lm(age2plot ~ Depth.m, data=OSL)) # 
+summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) # 
+# diff in slopes over
+# the standard error of the difference between the two slopes
+
+b1 <- coef(OSL_mod)["Depth.m"] 
+b2 <- coef(C14_mod)["Depth.m"]
+s1 <- 0 # summary(OSL_mod)$coefficients[2,2]
+s2 <- summary(C14_mod)$coefficients[2,2]
+
+t <- abs(b1 - b2)/ sqrt(abs(s1^2 - s2^2))
+(pval <- 2*pt(t, nrow(upper), lower=FALSE)) 
+
+# this is the pval that best matches what was in the ms as I received it (I don't know who did that computation... )
+
+# C14 dates have higher intercept, so they are greater
+
+
+# now do Bayesian approach... 
+library(MCMCpack)
+posterior1 <- (MCMCregress(age2plot ~ Depth.m, data=OSL))
+# windows()
+plot(posterior1)
+raftery.diag(posterior1)
+summary(posterior1)
+
+# intercept
+hist(posterior1[,1])
+# x1 (ie. slope)
+hist(posterior1[,2])
+# get distribution of slope
+x1_post <- as.numeric(posterior1[,2])
+# this is a bit absurd because just two data points...
+# let's trim it a bit, cf. https://stat.ethz.ch/pipermail/r-help/2010-August/247632.html
+.limit <- quantile(x1_post, prob=c(.45, .55))
+trm <- subset(x1_post, x1_post >= .limit[1] & x1_post <= .limit[2])
+quantile(trm) # check to see if we've removed some of the extreme values
+x1_post <- trm
+
+posterior2 <- (MCMCregress(age2plot ~ Depth.m, data=C14))
+# windows()
+plot(posterior2)
+raftery.diag(posterior2)
+summary(posterior2)
+
+# intercept
+hist(posterior2[,1])
+# x1 (ie. slope)
+hist(posterior2[,2])
+# get distribution of slope
+x2_post <- as.numeric(posterior2[,2])
+
+# now compare the two distributions of slopes
+
+
+# BEST http://www.indiana.edu/~kruschke/BEST/
+# devtools::install_github('mikemeredith/BEST')
+library(BEST)
+slopes_test <- BESTmcmc(x1_post, x2_post, verbose = TRUE)
+summary(slopes_test)
+print(slopes_test)
+plot(slopes_test)
+windows()
+plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
+        ROPEeff=c(-0.2,0.2), compValm=0.5) 
+pairs(slopes_test)
+
+
+# plot
+library(ggplot2)
+ggplot(upper, aes(age2plot, Depth.m, colour = Method)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = 14) +
+  scale_y_reverse()
+
+#### bayesian change point analysis on sedimentation rates
+
+library(bcp)
+
+
+# interpolate age from loess line with depth
+# this is for the lines that show oldest artefact, etc.
+cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),] , span = 0.4) # exclude ABOX dates
+cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 5, 0.01)))
+plot(cal.date.pr)
+cal.date.pr <- data.frame(age = cal.date.pr, depth = names(cal.date.pr))
+
+# do cp analysis on loess line
+cp <- bcp(as.numeric(na.omit(cal.date.pr$age)))
+plot(cp)
+legacyplot(cp)
+
+# do cp analysis on dates 
+cp <- bcp(as.numeric(dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]$age2plot))
+plot(cp)
+legacyplot(cp)
+cp
+
+# what samples are at these change points?
+dates_no_ABOX <- dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]
+cbind(dates_no_ABOX, cp$posterior.prob)
+
+# slope from KTL97 through KTL165 compare C14 to OSL
+
+# now limit for depth range KTL97 through KTL165
+
+# get depths of those dates
+KTL97_depth <- dates_1989[dates_1989$Lab.Code == "KTL97", ]$Depth.m
+# two values for KTL162, both the same, let's just get one
+KTL165_depth <- dates_1989[dates_1989$Lab.Code == "KTL165", ]$Depth.m[1]
+
+# subset all dates in the region of KTL97 - KTL165
+sub <- dates_1989[dates_1989$Depth.m %in% seq(1.550,1.900,0.001), ]
+
+
+# separate OSL and C14 dates to test for slope
+sub$Method <- ifelse(grepl("TL", sub$Method), "OSL", "C14")
+OSL <- sub[grepl("OSL", sub$Method),]
+C14 <- sub[!grepl("OSL", sub$Method),]
+
+# investigate regressions of depth-age by method
+# from http://r-eco-evo.blogspot.com/2011/08/comparing-two-regression-slopes-by.html
+summary(m1 <- aov( Depth.m ~ age2plot * Method, data = sub))
+# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
+
+# more parsimonious model is fit without the interaction to test for a significant differences in the slope. 
+summary(m2 <- aov( Depth.m ~ age2plot + Method, data = sub))
+
+anova(m1,m2)
+# removing the interaction DOES NOT significantly affect the fit of the model.  We observe that for the dates, the method has a NO significant  effect on age and the effect is NOT different for C14 and OSL 
+
+# Is there a difference in slopes of the regression line in the 
+# two methods
+# this approach is from http://core.ecu.edu/psyc/wuenschk/docs30/CompareCorrCoeff.pdf
+summary(OSL_mod <- lm(age2plot ~ Depth.m, data=OSL)) # 
+summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) # 
+# diff in slopes over
+# the standard error of the difference between the two slopes
+
+b1 <- coef(OSL_mod)["Depth.m"] 
+b2 <- coef(C14_mod)["Depth.m"]
+s1 <- 0 # summary(OSL_mod)$coefficients[2,2]
+s2 <- summary(C14_mod)$coefficients[2,2]
+
+t <- abs(b1 - b2)/ sqrt(abs(s1^2 - s2^2))
+(pval <- 2*pt(t, nrow(sub), lower=FALSE)) 
+
+# not very useful since onlye two data points...
+# C14 dates have higher intercept, so they are greater
+
+
+# now do Bayesian approach... 
+library(MCMCpack)
+posterior1 <- (MCMCregress(age2plot ~ Depth.m, data=OSL))
+# windows()
+plot(posterior1)
+raftery.diag(posterior1)
+summary(posterior1)
+
+# intercept
+hist(posterior1[,1])
+# x1 (ie. slope)
+hist(posterior1[,2])
+# get distribution of slope
+x1_post <- as.numeric(posterior1[,2])
+# this is a bit absurd because just two data points...
+# let's trim it a bit, cf. https://stat.ethz.ch/pipermail/r-help/2010-August/247632.html
+.limit <- quantile(x1_post, prob=c(.45, .55))
+trm <- subset(x1_post, x1_post >= .limit[1] & x1_post <= .limit[2])
+quantile(trm) # check to see if we've removed some of the extreme values
+x1_post <- trm
+
+posterior2 <- (MCMCregress(age2plot ~ Depth.m, data=C14))
+# windows()
+plot(posterior2)
+raftery.diag(posterior2)
+summary(posterior2)
+
+# intercept
+hist(posterior2[,1])
+# x1 (ie. slope)
+hist(posterior2[,2])
+# get distribution of slope
+x2_post <- as.numeric(posterior2[,2])
+# this is a bit absurd because just two data points...
+# let's trim it a bit, cf. https://stat.ethz.ch/pipermail/r-help/2010-August/247632.html
+.limit <- quantile(x2_post, prob=c(.45, .55))
+trm <- subset(x2_post, x2_post >= .limit[1] & x2_post <= .limit[2])
+quantile(trm) # check to see if we've removed some of the extreme values
+x2_post <- trm
+
+# now compare the two distributions of slopes
+
+
+# BEST http://www.indiana.edu/~kruschke/BEST/
+# devtools::install_github('mikemeredith/BEST')
+library(BEST)
+slopes_test <- BESTmcmc(x1_post, x2_post, verbose = TRUE)
+summary(slopes_test)
+print(slopes_test)
+plot(slopes_test)
+windows()
+plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
+        ROPEeff=c(-0.2,0.2), compValm=0.5) 
+pairs(slopes_test)
+
+
+# plot
+library(ggplot2)
+ggplot(sub, aes(age2plot, Depth.m, colour = Method)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = 14) +
+  scale_y_reverse()
+
+
+
+
+
+
+
+
+################################################################################
+# interpolate age from loess line with depth
+cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989)
+cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 5, 0.01)))
+plot(cal.date.pr)
+cal.date.pr <- data.frame(age = cal.date.pr, depth = names(cal.date.pr))
+# determine an age from a known depth
+i = 280 # depth in cm, to the nearest 1 cm
+cal.date.pr[cal.date.pr$depth == i,] # returns age from loess
+
+
+
+# interpolate depth from loess line with age
+cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989)
+cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 100000, 1000)))
+plot(cal.date.pr)
+cal.date.pr <- data.frame(depth = cal.date.pr, age = names(cal.date.pr))
+# determine an depth from a known age
+i = 54 # age in kya,
+cal.date.pr[cal.date.pr$cal.date == i,] # returns depth from loess, in m
+
+
+
+# change point analysis on linear regression residuals
+c14_all.lm <- with(c14_all, lm(depth ~ cal.date))
+layout(matrix(1:4,2,2))
+plot(c14_all.lm)
+dev.off()
+plot(c14_all.lm$residuals ~ c14_all.lm$fitted.values)
+
+library(bcp)
+c14_all.bcp <- bcp(c14_all.lm$residuals, w0 = 0.2, p0 = 0.2, burnin = 50, mcmc = 500, return.mcmc = FALSE)
+plot(c14_all.bcp)
+
+library(strucchange)
+efp <- efp(depth ~ cal.date, c14_all,type = "OLS-CUSUM")
+plot(efp(depth ~ cal.date, c14_all, type = "OLS-CUSUM"))
+plot(Fstats(depth ~ cal.date, data=c14_all))
+
+
+
+
+
+
+
+
+
