@@ -163,8 +163,14 @@ Computing a linear model with depth and age using the two dating methods as a cr
 upper <- dates_1989[dates_1989$Depth.m < 2, ]
 
 # investigate regressions of depth-age by method
-# from http://r-eco-evo.blogspot.com/2011/08/comparing-two-regression-slopes-by.html
-summary(m2 <- aov( Depth.m ~ age2plot * Two_methods, data = upper))# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
+# from 
+# http://stats.stackexchange.com/a/18397/7744 and 
+# http://r-eco-evo.blogspot.com/2011/08/comparing-two-regression-slopes-by.html
+# and Teetor, P. 2011 R Cookbook, O'Reilly.  p 309-311. 
+
+summary(m2 <- aov( Depth.m ~ age2plot * Two_methods, data = upper))
+
+# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
 ```
 
 If we restrict the sample to just the dates in the upper 2 m, which is the depth of the lowest in-sequence radiocarbon date (SUA-265), we can more robustly compare the ages from radiocabon and luminesensce methods. 
@@ -180,43 +186,47 @@ m2m3 <- anova(m2,m3)
 # removing the interaction DOES NOT significantly affect the fit of the model.  We observe that for the dates, the method has a NO significant  effect on age and the effect is NOT different for C14 and OSL 
 ```
 
-We can fit a more parsimonious model without the interaction to test for significant differences in slope. The result is that removing the interaction does not significantly effect the fit of the model. There is still no significant effect of dating method on the slope of the age-depth lines (p = `r sprintf("%.3f",anova(m2, m3)$`Pr(>F)`[2])`)
+We can fit a more parsimonious model without the interaction to test for significant differences in slope. We can compare the two models for each dating method with ANOVA to assess if removing the interaction significantly affects the fit of the model. The result is that removing the interaction does not significantly effect the fit of the model. There is still no significant effect of dating method on the slope of the age-depth lines (p = `r sprintf("%.3f",anova(m2, m3)$`Pr(>F)`[2])`)
 
-```
+```{r difference-in-slope-4}
 
 # Is there a difference in slopes of the regression line in the 
-# two methods
-# this approach is from http://core.ecu.edu/psyc/wuenschk/docs30/CompareCorrCoeff.pdf
-summary(OSL_mod <- lm(age2plot ~ Depth.m, data=OSL)) # 
+# two methods?
+summary(OSL_TL_mod <- lm(age2plot ~ Depth.m, data=OSL_TL)) # 
 summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) # 
-# diff in slopes over
-# the standard error of the difference between the two slopes
 
-b1 <- coef(OSL_mod)["Depth.m"] 
-b2 <- coef(C14_mod)["Depth.m"]
-s1 <- 0 # summary(OSL_mod)$coefficients[2,2]
-s2 <- summary(C14_mod)$coefficients[2,2]
+# Using the procedure developed by R. A. Fisher in 1921 (On the probable error # # of a coefficient of correlation deduced from a small sample, Metron, 1, 3-32)
 
-t <- abs(b1 - b2)/ sqrt(abs(s1^2 - s2^2))
-(pval <- 2*pt(t, nrow(upper), lower=FALSE)) 
+# get r values
+OSL_TL_mod_slope <- summary(OSL_TL_mod)[[4]][2,1]
+C14_mod_slope <- summary(C14_mod)[[4]][2,1]
 
-# this is the pval that best matches what was in the ms as I received it (I don't know who did that computation... )
+# copmute r-prime
+OSL_TL_mod_slope1 <- 0.5 * (log(  abs((1+OSL_TL_mod_slope) / (1-OSL_TL_mod_slope) ) ) )
+C14_mod_slope1 <- 0.5 * (log(  abs((1+C14_mod_slope) / (1-C14_mod_slope) ) ) )
 
-# C14 dates have higher intercept, so they are greater
+# compute z
+z <- (OSL_TL_mod_slope1 - C14_mod_slope1) / sqrt ( (1/(nrow(OSL_TL) - 3) + 1/(nrow(C14) - 3)))
 
+# p from z
+p_value <- 2*pnorm(-abs(z))
+```
 
+The slope values are `r round(OSL_TL_mod_slope,2)` for the OSL/TL dates and `r round(C14_mod_slope,2)` for the C14 dates. Fisher's method suggests there is no difference with p = `r p_value` for the difference between slopes. 
+
+```{r difference-in-slope-4} 
 # now do Bayesian approach... 
 library(MCMCpack)
 posterior1 <- (MCMCregress(age2plot ~ Depth.m, data=OSL))
 # windows()
-plot(posterior1)
+# plot(posterior1)
 raftery.diag(posterior1)
 summary(posterior1)
 
 # intercept
-hist(posterior1[,1])
+# hist(posterior1[,1])
 # x1 (ie. slope)
-hist(posterior1[,2])
+hist(posterior1[,2], main = parse(text='Slope~of~OSL'))
 # get distribution of slope
 x1_post <- as.numeric(posterior1[,2])
 # this is a bit absurd because just two data points...
@@ -228,19 +238,18 @@ x1_post <- trm
 
 posterior2 <- (MCMCregress(age2plot ~ Depth.m, data=C14))
 # windows()
-plot(posterior2)
+# plot(posterior2)
 raftery.diag(posterior2)
 summary(posterior2)
 
 # intercept
 hist(posterior2[,1])
 # x1 (ie. slope)
-hist(posterior2[,2])
+hist(posterior2[,2], main = parse(text='Slope~of~""^14*C'))
 # get distribution of slope
 x2_post <- as.numeric(posterior2[,2])
 
 # now compare the two distributions of slopes
-
 
 # BEST http://www.indiana.edu/~kruschke/BEST/
 # devtools::install_github('mikemeredith/BEST')
@@ -460,7 +469,7 @@ Based on the TL age estimates and the artefact distribution, Roberts et al. (199
 
 At the time of Roberts et al.’s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001 – 17,429 cal BP, overlapping at 1σ with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allen’s (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1σ with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1σ of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
 
-Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to 178 cm bs (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost 178 cm of deposit (Bayesian estimation of difference in means = -0.309, 95% HDI - 8.27 – 0.020). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990). 
+Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to two meters below the surface (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = -0.309, 95% HDI - 8.27 – 0.020). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990). 
 
 The full suite of available 14C and luminescence ages for the site are both shown in Figure 5. The locally weighted regression line of best fit for these dates shows several changes in sedimentation rate but no obvious hiatus. Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is 0.934 at 24 ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is 0.922 at 65 ka). Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = 3.7, 95% HDI -2.13 – 9.38). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
 
