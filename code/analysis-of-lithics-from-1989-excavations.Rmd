@@ -38,11 +38,7 @@ ggplot(lithics, aes(Spit, Total.Artefacts)) +
 # plot with ka along x-axis to help read peaks
 
 # assumes you run all the code already for working with dates...
-cal.date.pr # interpolated ages to known depths
-
-
-
-############ problem with plotting ages and total lithics ###
+# cal.date.pr # interpolated ages to known depths
 
 ########### problem with two excel files for lithic data that seem to be slightly different! 
 
@@ -105,21 +101,14 @@ spit <- read.table(header  = TRUE, text = "spit start.depth end.depth
 # find midppoint of each spit by averaging start and end depth
 spit$mid <- round((apply(spit[,-1], 1, mean)),0)/100
 
-
-library(data.table)
-dt <- data.table(spit)
-spits <- dt[, list(depth = seq(start.depth, end.depth)), by = spit]
-
 # interpolate age from midpoint depth of each spit
 # using output from the depth-age plot
 # interpolate age from loess line with depth
 
 spit.depth.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0,4,0.01)))
-plot(spit.depth.pr)
-spit.depth.pr.df <- data.frame(age = spit.depth.pr, depth = names(spit.depth.pr))
+# plot(spit.depth.pr)
+spit.depth.pr.df <- data.frame(age = spit.depth.pr, depth = as.numeric(names(spit.depth.pr))/100)
 spit.depth.pr.df$depth <- as.numeric(as.character(spit.depth.pr.df$depth))
-
-
 
 # merge interpolated depths  to lithic data
 interpolated_depths <- merge(x = lithics, 
@@ -128,15 +117,28 @@ interpolated_depths <- merge(x = lithics,
       by.y = "spit",
       all.x = TRUE)
 
-
-
-# merge interpolated depths to lithics dataframe
-interpolated_depths <- merge(x = lithics, 
+# merge interpolated ages to lithics dataframe
+interpolated_ages <- merge(x = interpolated_depths, 
       y = spit.depth.pr.df, 
-      by.x = "Approx.Depth..cm.", 
+      by.x = "mid", 
       by.y = "depth",
       all.x = TRUE)
 
+# plot with ages, the interpolation isn't very good
+# ggplot(interpolated_ages, aes(age, Total.Artefacts)) +
+#   geom_bar(stat="identity") +
+#   theme_minimal(base_size = 12) +
+#   ylab("Number of stone artefacts >6 mm")  +
+#   ylim(0,600) +
+#   scale_x_continuous(breaks = seq(0, 70, 5))
+
+# plot with depth
+# ggplot(interpolated_ages, aes(mid, Total.Artefacts)) +
+#   geom_bar(stat="identity") +
+#   theme_minimal(base_size = 12) +
+#   ylab("Number of stone artefacts >6 mm")  +
+#   ylim(0,600) +
+#   scale_x_continuous(breaks = seq(0, 3, 0.5))
 
 ```
 
@@ -144,7 +146,13 @@ Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 
 
 ```{r raw-materials}
 # select raw materials that show time sensitive pattern
-lithology <- with(lithics, cbind(Local.Coarse.Grained.Quartzite, Silcrete, Quartz, Chert))
+Local.Coarse.Grained.Quartzite_perc <- with(lithics, (Local.Coarse.Grained.Quartzite/Total.Artefacts))
+Silcrete_perc <- with(lithics, (Silcrete/Total.Artefacts))
+Quartz_perc <- with(lithics, (Quartz/Total.Artefacts))
+Chert_perc <- with(lithics, (Chert/Total.Artefacts))
+lithology <- cbind(Local.Coarse.Grained.Quartzite_perc, Silcrete_perc, Quartz_perc, Chert_perc)
+# replace NA with zero
+lithology[is.na(lithology)]  <- 0
 # get spit numbers
 spits <- with(lithics, cbind(Spit))
 # combine spits and lithologies
@@ -167,88 +175,23 @@ ggplot(plot.m, aes(group = rawmaterial, x = Spit, y = percentage)) + geom_line(a
   theme(axis.text.y = element_text(size = 15)) +
   theme(axis.title.x = element_text(size = 15)) +
   theme(axis.title.y = element_text(size = 15, angle = 90)) +
-  labs(colour = "Raw material") 
+  labs(colour = "Raw material") +
+  theme_minimal()
 
-
-# prepare spit and depth data for showing on the plot
-# these are from CC's lithic sheet
-spit <- read.table(header  = TRUE, text = "spit start.depth end.depth
-51  297 307
-50  287 297
-49	281 287
-48	269 281
-47	266 269
-46	259 266
-45	249 259
-44	249 256
-43	250 252 # rubble lens
-42 242 249
-41	242 250
-40	232 242
-39	232 242
-38	222 232
-37	212 222
-36	205 212
-35	192 205
-34	186 192
-33	181 186
-32	175 181
-31	166 172
-30	161 166
-28	152 161
-27	147 152
-26	142 147
-25	136 142
-24	128 136
-23	125 128
-22	116 125
-21	107 116
-20	100 107
-19	95 101
-18	91 95
-17	83 91
-16	78 83
-15	71 78
-14	65 71
-13	60 65
-12	54 60
-11	50 54
-10	44 50
-9	42 44
-8	36 42
-7	30 36
-6	25 30 # incomplete to surface
-5	20 25
-4	15 20 # 16, 
-3	10 15 
-2	5 10
-1	0 5")
- 
-# find midppoint of each spit by averaging start and end depth
-spit$mid <- (apply(spit[,-1], 1, mean))/100
-
-# interpolate age from midpoint depth of each spit
-# using output from the depth-age plot
-# interpolate age from loess line with depth
-
-cal.date.pr <- data.frame(age = cal.date.pr, depth = round(spit$mid*100,0))
-# determine an age from a known depth
-i = 254 # depth in cm, to the nearest 1 cm
-cal.date.pr[cal.date.pr$depth == i,] # returns age from loess
 
 # merge depths and ages to lithic data
-plot <- merge(plot[c(1:50),], spit, by.x = "Spit", by.y = "spit")
-plot <- merge(plot, cal.date.pr, by.x = "mid", by.y = "depth")
+plot1 <- merge(plot[c(1:50),], spit, by.x = "Spit", by.y = "spit")
+plot1$mid <- plot1$mid * 100
+plot2 <- merge(plot1, cal.date.pr, by.x = "mid", by.y = "depth")
 
 # melt for plotting with age on x-axis - put in paper on 1989 data
 library(reshape2)
-plot.m <- melt(plot, id.vars = "age", measure.vars = c("Quartzite", "Silcrete", "Quartz", "Chert"))
+plot.m <- melt(plot2, id.vars = "age", measure.vars = c("Quartzite", "Silcrete", "Quartz", "Chert"))
 colnames(plot.m) <- c("age", "rawmaterial", "percentage")
-plot.m$age <- plot.m$age/1000
+
 library(ggplot2)
 ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = rawmaterial)) + 
   geom_line(size = 1) +
-  theme_bw() +
   xlab("Age (cal. ka BP)") +
   xlim(0,65) + 
   ylab("Percent of assemblage in each spit") +
