@@ -1,0 +1,278 @@
+# Lithics 
+
+
+```{r load-data}
+# assumes you've set the directory earlier when running the
+# code for lithicsing, if not, uncomment and uplithicse this next line
+directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/data/"
+lithics <- read.csv(paste0(directory, "Lithics_table_from_paper_on_1989_dig.csv"))
+```
+
+
+
+```{r clean-data}
+
+# filter the data for display (remove some dates )
+lithics$C14 <- as.numeric(as.character(lithics$C14))
+lithics$C14[lithics$C14 %in% c(0.7, 15.0, 24)] <- NA
+
+# filter anomalous spit
+lithics <- lithics[!(lithics$Spit == 62),]
+
+# get rid of NA rows for total artefact count
+lithics <- lithics[!(is.na(lithics$Total.Artefacts)),]
+```
+
+
+```{r plot-data}
+# plot
+library(ggplot2)
+ggplot(lithics, aes(Spit, Total.Artefacts)) +
+  geom_bar(stat="identity") +
+  theme_minimal(base_size = 12) +
+  ylab("Number of stone artefacts >6 mm") +
+  annotate("text", x = lithics$Spit, y = (lithics$Total.Artefacts + 100), label = round(lithics$C14, 3), size = 4) +
+  annotate("text", x = lithics$Spit, y = (lithics$Total.Artefacts + 280), label = round(lithics$OSL, 3), colour = "red", fontface="bold.italic", size = 4) +
+  ylim(0,600)
+
+# plot with ka along x-axis to help read peaks
+
+# assumes you run all the code already for working with dates...
+cal.date.pr # interpolated ages to known depths
+
+
+
+############ problem with plotting ages and total lithics ###
+
+########### problem with two excel files for lithic data that seem to be slightly different! 
+
+
+
+# prepare spit and depth data for showing on the plot
+# these are from CC's lithic sheet
+spit <- read.table(header  = TRUE, text = "spit start.depth end.depth
+51  297 307
+50  287 297
+49	281 287
+48	269 281
+47	266 269
+46	259 266
+45	249 259
+44	249 256
+43	250 252 # rubble lens
+42 242 249
+41	242 250
+40	232 242
+39	232 242
+38	222 232
+37	212 222
+36	205 212
+35	192 205
+34	186 192
+33	181 186
+32	175 181
+31	166 172
+30	161 166
+28	152 161
+27	147 152
+26	142 147
+25	136 142
+24	128 136
+23	125 128
+22	116 125
+21	107 116
+20	100 107
+19	95 101
+18	91 95
+17	83 91
+16	78 83
+15	71 78
+14	65 71
+13	60 65
+12	54 60
+11	50 54
+10	44 50
+9	42 44
+8	36 42
+7	30 36
+6	25 30 # incomplete to surface
+5	20 25
+4	15 20 # 16, 
+3	10 15 
+2	5 10
+1	0 5")
+ 
+# find midppoint of each spit by averaging start and end depth
+spit$mid <- round((apply(spit[,-1], 1, mean)),0)/100
+
+
+library(data.table)
+dt <- data.table(spit)
+spits <- dt[, list(depth = seq(start.depth, end.depth)), by = spit]
+
+# interpolate age from midpoint depth of each spit
+# using output from the depth-age plot
+# interpolate age from loess line with depth
+
+spit.depth.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0,4,0.01)))
+plot(spit.depth.pr)
+spit.depth.pr.df <- data.frame(age = spit.depth.pr, depth = names(spit.depth.pr))
+spit.depth.pr.df$depth <- as.numeric(as.character(spit.depth.pr.df$depth))
+
+
+
+# merge interpolated depths  to lithic data
+interpolated_depths <- merge(x = lithics, 
+      y = spit, 
+      by.x = "Spit", 
+      by.y = "spit",
+      all.x = TRUE)
+
+
+
+# merge interpolated depths to lithics dataframe
+interpolated_depths <- merge(x = lithics, 
+      y = spit.depth.pr.df, 
+      by.x = "Approx.Depth..cm.", 
+      by.y = "depth",
+      all.x = TRUE)
+
+
+```
+
+Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 6, Table 2). These show distinct pulses of accumulation, centred around 5, 7, 12.5, 18.4, 36, and 45 – 52 ka (Figure 6). Between Spits 37 – 39 (2.2 – 2.4 m bs) there are 1900 flaked stone artefacts from the 7 mm sieve (including 41 of exotic chert), numerous pieces of high-grade haematite (totalling 4.92 kg, including seven ground pieces), 143 g of red or yellow ochre, pieces of dolerite (presumed to be fragments of edge-ground axes) and fragments of grindstones; a further 568 flaked stone artefacts and 344 pieces of haematite were recovered from the pit fill at this level. All of these are associated with, or are slightly beneath, a TL age of 45 ± 9 ka. Beneath this, in levels dating 52 ± 11 to 61 ± 13 ka there were an additional 82 flaked stone artefacts and 52 pieces of haematite recovered from the 7 mm sieve. This is a comparatively large assemblage from a trench measuring only 1 x 1.5 m. It is unlikely the quartzite stone artefacts derive from downward displacement of artefacts from the predominately quartz assemblage that overlies it.  
+
+```{r raw-materials}
+# select raw materials that show time sensitive pattern
+lithology <- with(lithics, cbind(Local.Coarse.Grained.Quartzite, Silcrete, Quartz, Chert))
+# get spit numbers
+spits <- with(lithics, cbind(Spit))
+# combine spits and lithologies
+plot <- data.frame(cbind(lithology, spits))
+# rename columns
+colnames(plot) <- c("Quartzite", "Silcrete", "Quartz", "Chert", "Spit")
+# order by spit, top to bottom
+plot <- plot[with(plot, order(plot$Spit)),]
+# melt for plotting
+library(reshape2)
+plot.m <- melt(plot, id.vars = "Spit")
+colnames(plot.m) <- c("Spit", "rawmaterial", "percentage")
+library(ggplot2)
+ggplot(plot.m, aes(group = rawmaterial, x = Spit, y = percentage)) + geom_line(aes(colour = rawmaterial), size = 1) +
+  #theme_bw() +
+  xlab("Spit") +
+  xlim(0,50) + 
+  ylab("Percent of assemblage in each spit") +
+  theme(axis.text.x = element_text(size = 15)) + 
+  theme(axis.text.y = element_text(size = 15)) +
+  theme(axis.title.x = element_text(size = 15)) +
+  theme(axis.title.y = element_text(size = 15, angle = 90)) +
+  labs(colour = "Raw material") 
+
+
+# prepare spit and depth data for showing on the plot
+# these are from CC's lithic sheet
+spit <- read.table(header  = TRUE, text = "spit start.depth end.depth
+51  297 307
+50  287 297
+49	281 287
+48	269 281
+47	266 269
+46	259 266
+45	249 259
+44	249 256
+43	250 252 # rubble lens
+42 242 249
+41	242 250
+40	232 242
+39	232 242
+38	222 232
+37	212 222
+36	205 212
+35	192 205
+34	186 192
+33	181 186
+32	175 181
+31	166 172
+30	161 166
+28	152 161
+27	147 152
+26	142 147
+25	136 142
+24	128 136
+23	125 128
+22	116 125
+21	107 116
+20	100 107
+19	95 101
+18	91 95
+17	83 91
+16	78 83
+15	71 78
+14	65 71
+13	60 65
+12	54 60
+11	50 54
+10	44 50
+9	42 44
+8	36 42
+7	30 36
+6	25 30 # incomplete to surface
+5	20 25
+4	15 20 # 16, 
+3	10 15 
+2	5 10
+1	0 5")
+ 
+# find midppoint of each spit by averaging start and end depth
+spit$mid <- (apply(spit[,-1], 1, mean))/100
+
+# interpolate age from midpoint depth of each spit
+# using output from the depth-age plot
+# interpolate age from loess line with depth
+
+cal.date.pr <- data.frame(age = cal.date.pr, depth = round(spit$mid*100,0))
+# determine an age from a known depth
+i = 254 # depth in cm, to the nearest 1 cm
+cal.date.pr[cal.date.pr$depth == i,] # returns age from loess
+
+# merge depths and ages to lithic data
+plot <- merge(plot[c(1:50),], spit, by.x = "Spit", by.y = "spit")
+plot <- merge(plot, cal.date.pr, by.x = "mid", by.y = "depth")
+
+# melt for plotting with age on x-axis - put in paper on 1989 data
+library(reshape2)
+plot.m <- melt(plot, id.vars = "age", measure.vars = c("Quartzite", "Silcrete", "Quartz", "Chert"))
+colnames(plot.m) <- c("age", "rawmaterial", "percentage")
+plot.m$age <- plot.m$age/1000
+library(ggplot2)
+ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = rawmaterial)) + 
+  geom_line(size = 1) +
+  theme_bw() +
+  xlab("Age (cal. ka BP)") +
+  xlim(0,65) + 
+  ylab("Percent of assemblage in each spit") +
+  #scale_x_continuous(labels = comma, breaks = seq(0,65,20)) +
+  theme(axis.text.x = element_text(size = 15)) + 
+  theme(axis.text.y = element_text(size = 15)) +
+  theme(axis.title.x = element_text(size = 15)) +
+  theme(axis.title.y = element_text(size = 15, angle = 90)) +
+  labs(colour = "Raw material") +
+  guides(linetype=FALSE) +  
+  theme_minimal(base_size = 16)
+
+# save plot as SVG for finessing...
+ggsave(file="F:\\My Documents\\My UW\\Research\\1206 M2 excavation\\Dating\\MKII_lithics_from_1989_for_paper.svg")
+
+
+testdata <- data.frame(var1 = 1:10, var2 = 1:10) 
+ggplot(data = testdata, mapping = aes(x = var1, y = var2)) +
+  geom_line() + 
+  scale_x_continuous(limits = c(1, 10),
+  breaks = c(1, 1.5, 2, 3, 4, 4.5, 5, 6, 7, 7.5, 8, 9, 10), 
+  labels = c('A', '\n1', 'B', '\n2', 'C', '\n3', 'D', '\n4',
+                                'E', '\n5', 'F', '\n6', 'G')) +
+  opts(panel.grid.major = theme_blank(), panel.grid.minor = theme_blank()) +
+  geom_vline(xintercept = c(1, 2, 4, 5, 7, 8, 10), colour = 'white') +
+  geom_hline(yintercept = c(2, 4, 6, 8, 10), colour = 'white') +
+ geom_line()  + opts(axis.ticks = theme_blank())

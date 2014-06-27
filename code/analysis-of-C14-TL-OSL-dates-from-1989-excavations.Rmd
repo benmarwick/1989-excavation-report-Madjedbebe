@@ -156,7 +156,7 @@ summary(m1 <- aov( Depth.m ~ age2plot * Two_methods, data = dates_1989))
 # significant difference interaction, These results suggest that the slope of the regression between date and depth width is not similar for the two dating methods.
 ```
 
-Computing a linear model with depth and age using the two dating methods as a cross to test for interaction between them gives a significant difference, with a p-value of `r anova(m1)$'Pr(>F)'[3]`. 
+Computing a linear model with depth and age using the two dating methods as a cross to test for interaction between them gives a significant difference, with a p-value of `r round(anova(m1)$`Pr(>F)`[3],3)`. 
 
 ```{r  difference-in-slope-2}
 # now limit to upper 178 cm
@@ -170,7 +170,7 @@ upper <- dates_1989[dates_1989$Depth.m < 2, ]
 
 summary(m2 <- aov( Depth.m ~ age2plot * Two_methods, data = upper))
 
-# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
+# NO significant difference interaction at <2m bs, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
 ```
 
 If we restrict the sample to just the dates in the upper 2 m, which is the depth of the lowest in-sequence radiocarbon date (SUA-265), we can more robustly compare the ages from radiocabon and luminesensce methods. 
@@ -194,6 +194,10 @@ We can fit a more parsimonious model without the interaction to test for signifi
 # two methods?
 summary(OSL_TL_mod <- lm(age2plot ~ Depth.m, data=OSL_TL)) # 
 summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) # 
+# plot(age2plot ~ Depth.m, data=OSL_TL, col = "green")
+# points(age2plot ~ Depth.m, data=C14, col = "red")
+# abline(OSL_TL_mod, col = "green")
+# abline(C14_mod, col = "red")
 
 # Using the procedure developed by R. A. Fisher in 1921 (On the probable error # # of a coefficient of correlation deduced from a small sample, Metron, 1, 3-32)
 
@@ -214,10 +218,10 @@ p_value <- 2*pnorm(-abs(z))
 
 The slope values are `r round(OSL_TL_mod_slope,2)` for the OSL/TL dates and `r round(C14_mod_slope,2)` for the C14 dates. Fisher's method suggests there is no difference with p = `r p_value` for the difference between slopes. 
 
-```{r difference-in-slope-4} 
+```{r difference-in-slope-bayes-1} 
 # now do Bayesian approach... 
 library(MCMCpack)
-posterior1 <- (MCMCregress(age2plot ~ Depth.m, data=OSL))
+posterior1 <- (MCMCregress(age2plot ~ Depth.m, data=OSL_TL))
 # windows()
 # plot(posterior1)
 raftery.diag(posterior1)
@@ -244,12 +248,15 @@ raftery.diag(posterior2)
 summary(posterior2)
 
 # intercept
-hist(posterior2[,1])
+# hist(posterior2[,1])
 # x1 (ie. slope)
 hist(posterior2[,2], main = parse(text='Slope~of~""^14*C'))
 # get distribution of slope
 x2_post <- as.numeric(posterior2[,2])
+```
 
+
+```{r difference-in-slope-bayes-2}
 # now compare the two distributions of slopes
 
 # BEST http://www.indiana.edu/~kruschke/BEST/
