@@ -231,10 +231,11 @@ hist(posterior1[,2], main = parse(text='Slope~of~OSL'))
 x1_post <- as.numeric(posterior1[,2])
 # this is a bit absurd because just two data points...
 # let's trim it a bit, cf. https://stat.ethz.ch/pipermail/r-help/2010-August/247632.html
-.limit <- quantile(x1_post, prob=c(.45, .55))
-trm <- subset(x1_post, x1_post >= .limit[1] & x1_post <= .limit[2])
-quantile(trm) # check to see if we've removed some of the extreme values
-x1_post <- trm
+# .limit <- quantile(x1_post, prob=c(.45, .55))
+# trm <- subset(x1_post, x1_post >= .limit[1] & x1_post <= .limit[2])
+# quantile(trm) # check to see if we've removed some of the extreme values
+# x1_post <- trm
+# hist(x1_post)
 
 posterior2 <- (MCMCregress(age2plot ~ Depth.m, data=C14))
 # windows()
@@ -262,16 +263,33 @@ windows()
 plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
         ROPEeff=c(-0.2,0.2), compValm=0.5) 
 pairs(slopes_test)
-
+# key output is muDiff from summary
+# http://cran.r-project.org/web/packages/BEST/vignettes/BEST.pdf
+# since this a time-consume analysis, here's the out put as of
+# 27 Jun 2014
+#             mean median   mode HDI% HDIlo  HDIup compVal %>compVal
+# mu1       24.699 24.699 24.699   95 24.69 24.711                  
+# mu2        7.607  7.607  7.608   95  7.57  7.642                  
+# muDiff    17.092 17.092 17.089   95 17.05 17.129       0       100
+# sigma1     0.168  0.168  0.168   95  0.16  0.176                  
+# sigma2     1.684  1.684  1.685   95  1.65  1.720                  
+# sigmaDiff -1.516 -1.516 -1.518   95 -1.55 -1.479       0         0
+# nu        12.176 12.072 11.807   95  9.92 14.601                  
+# log10nu    1.083  1.082  1.079   95  1.00  1.169                  
+# effSz     14.289 14.287 14.278   95 13.98 14.605       0       100
+# 
+# the diff in means seems very high, 17, and excludes zero, which is what we'd describe as significant... that's at odds with the other methods... redo it without the trimming
 
 # plot
 library(ggplot2)
-ggplot(upper, aes(age2plot, Depth.m, colour = Method)) +
+ggplot(upper, aes(age2plot, Depth.m, colour = Two_methods)) +
   geom_point(size = 3) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal(base_size = 14) +
   scale_y_reverse()
 ```
+
+A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = `r round(summary(slopes_test)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test)[3, 5:6]),2)`).
 
 
 ```{r change-point-analysis}
