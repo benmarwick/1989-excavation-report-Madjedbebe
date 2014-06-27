@@ -133,15 +133,15 @@ dates_1989$Two_methods <- ifelse(dates_1989$Method == "TL"|dates_1989$Method == 
 # plot
 library(ggplot2)
 ggplot(dates_1989, aes(age2plot, Depth.m, colour = Two_methods)) +
-  geom_point(size = 3) +
+  geom_point(size = 1) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal(base_size = 14) +
   scale_y_reverse() + 
+  geom_text(aes(label = Lab.Code), size = 3, hjust=1, vjust=1) + 
   ylab("meters below surface") + xlab("x 1000 years cal. BP") 
 ```
 
 Plotting the linear regression lines for OSL/TL ages against radiocarbon ages suggests that the slopes of the lines are not the same. We can explore this further by comparing the models directly.
-
 
 ```{r difference-in-slope-1}
 # Looking into the question of difference in slope of 
@@ -160,23 +160,29 @@ Computing a linear model with depth and age using the two dating methods as a cr
 
 ```{r  difference-in-slope-2}
 # now limit to upper 178 cm
-upper <- dates_1989[dates_1989$Depth.m < 1.78, ]
-
-# separate OSL and C14 dates to test for slope
-upper$Method <- ifelse(grepl("TL", upper$Method), "OSL", "C14")
-OSL <- upper[grepl("OSL", upper$Method),]
-C14 <- upper[!grepl("OSL", upper$Method),]
+upper <- dates_1989[dates_1989$Depth.m < 2, ]
 
 # investigate regressions of depth-age by method
 # from http://r-eco-evo.blogspot.com/2011/08/comparing-two-regression-slopes-by.html
-summary(m1 <- aov( Depth.m ~ age2plot * Two_methods, data = upper))
-# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
+summary(m2 <- aov( Depth.m ~ age2plot * Two_methods, data = upper))# NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
+```
+
+If we restrict the sample to just the dates in the upper 2 m, which is the depth of the lowest in-sequence radiocarbon date (SUA-265), we can more robustly compare the ages from radiocabon and luminesensce methods. 
+
+In the ANCOVA model, age is modeled as the dependent variable with depth as the factor and dating method as the covariate. The summary of the results show a significant effect of depth (p = `r sprintf("%.5f",anova(m2)$`Pr(>F)`[1])`, but no significant interaction between dating methods (p = `r sprintf("%.3f",anova(m2)$`Pr(>F)`[3])`. These results suggest that the slope of the regression between age and depth is similar for both dating methods.
+
+```{r difference-in-slope-3}
 
 # more parsimonious model is fit without the interaction to test for a significant differences in the slope. 
-summary(m2 <- aov( Depth.m ~ age2plot + Method, data = upper))
+summary(m3 <- aov( Depth.m ~ age2plot + Two_methods, data = upper))
 
-anova(m1,m2)
+m2m3 <- anova(m2,m3)
 # removing the interaction DOES NOT significantly affect the fit of the model.  We observe that for the dates, the method has a NO significant  effect on age and the effect is NOT different for C14 and OSL 
+```
+
+We can fit a more parsimonious model without the interaction to test for significant differences in slope. The result is that removing the interaction does not significantly effect the fit of the model. There is still no significant effect of dating method on the slope of the age-depth lines (p = `r sprintf("%.3f",anova(m2, m3)$`Pr(>F)`[2])`)
+
+```
 
 # Is there a difference in slopes of the regression line in the 
 # two methods
@@ -454,7 +460,7 @@ Based on the TL age estimates and the artefact distribution, Roberts et al. (199
 
 At the time of Roberts et al.’s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001 – 17,429 cal BP, overlapping at 1σ with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allen’s (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1σ with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1σ of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
 
-Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to 178 cm bs. A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost 178 cm of deposit (Bayesian estimation of difference in means = -0.309, 95% HDI - 8.27 – 0.020). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990). 
+Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to 178 cm bs (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost 178 cm of deposit (Bayesian estimation of difference in means = -0.309, 95% HDI - 8.27 – 0.020). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990). 
 
 The full suite of available 14C and luminescence ages for the site are both shown in Figure 5. The locally weighted regression line of best fit for these dates shows several changes in sedimentation rate but no obvious hiatus. Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is 0.934 at 24 ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is 0.922 at 65 ka). Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = 3.7, 95% HDI -2.13 – 9.38). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
 
