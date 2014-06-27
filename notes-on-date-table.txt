@@ -28,11 +28,11 @@ KTL-164 45 +/- 9 ka
 
 * Roberts, R.G., Jones, R., Smith, M.A., 1990a. Thermoluminscence dating of a 50,000-year-old human occupation site in northern Australia. Nature 345, 153–156.
 
-KTL-156 0.2 +/- 1.3
+KTL-156 0.2 +/- 1.2, 1.3
 KTL-97  24 +/- 5
 KTL-158 52 +/- 11
-KTL-162 61 +/- 9.13  
-KTL-164 45 +/- 6.9 
+KTL-162 61 +/- 9, 13  
+KTL-164 45 +/- 6, 9 
 KTL-141 65 +/- 14
 KTL-116 86 +/- 18
 KTL-163 107 +/- 21

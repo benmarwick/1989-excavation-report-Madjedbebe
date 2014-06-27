@@ -5,7 +5,11 @@ date: Thursday, June 26, 2014
 output: html_document
 ---
 
-# Analysis of dates from the 1989 excavations at Madjebebe (Malakanunja II)
+# Supplementary details supporting the analysis of information from the 1989 excavations at Madjebebe (Malakanunja II)
+
+
+
+
 
 ```{r read-in-data}
 # plot all dates for 1989 paper, colour by method
@@ -51,26 +55,31 @@ dates_1989_with_C14_medians$age2plot <- (ifelse(dates_1989_with_C14_medians$Meth
 
 # simplify object name
 dates_1989 <- dates_1989_with_C14_medians
+```
+
+
+```{r interpolate}
 
 # interpolate age from loess line with depth
 # this is for the lines that show oldest artefact, etc.
 cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),] , span = 0.4) # exclude ABOX dates
 cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 5, 0.01)))
-plot(cal.date.pr)
+# plot(cal.date.pr) # just to check
 cal.date.pr <- data.frame(age = cal.date.pr, depth = names(cal.date.pr))
 # determine an age from a known depth
-i = 287 # depth in cm, to the nearest 1 cm: oldest artefacts
-oldest <- cal.date.pr[cal.date.pr$depth == i,]$age # returns age from loess
-i = 250 # depth in cm, to the nearest 1 cm: base of dense artefacts
-dense <- cal.date.pr[cal.date.pr$depth == i,]$age # returns age from loess
+oldest_depth = 287 # depth in cm, to the nearest 1 cm: oldest artefacts
+oldest <- cal.date.pr[cal.date.pr$depth == oldest_depth,]$age # returns age from loess
+base_of_dense_depth = 250 # depth in cm, to the nearest 1 cm: base of dense artefacts
+dense <- cal.date.pr[cal.date.pr$depth == base_of_dense_depth,]$age # returns age from loess
+```
 
-
+```{r plot-dates}
 library(ggplot2)
 limits <- aes(ymax = age2plot  + Error/1000, ymin = age2plot  - Error/1000, colour = factor(Method))
 library(scales) # needed for axis number format
 ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) + 
   # add loess line that excludes the ABOX dates
-  geom_smooth(data =  dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]  , method = "loess", se = FALSE, span = 0.4, colour = "grey", alpha = 0.2, size = 1) +
+  geom_smooth(data =  dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]  , method = "loess", se = FALSE, span = 0.5, colour = "grey", alpha = 0.2, size = 1) +
   # set point size, colour and shape
   geom_point(size = 2, aes(colour = factor(Method), shape = factor(Method))) + 
   # add error bars
@@ -86,13 +95,13 @@ ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
   scale_y_continuous(labels = comma, breaks = seq(0,100,20)) + 
   scale_x_reverse() + # top to bottom of the trench
   # lines for lowest artefacts at 2.8 m
-  geom_segment(aes(x = 2.8, y = oldest, xend = 4.75, yend = oldest), colour = "grey30") +
-  geom_segment(aes(x = 2.8, y = 0, xend = 2.8, yend = oldest), , colour = "grey30") +
-  annotate("text", x = 2.9, y = 21, label = paste0("lowest artefacts (", round(oldest,0), " ka BP)"), size = 3) +
+  annotate("segment", x = oldest_depth/100, y = oldest, xend = -4.75, yend = oldest, colour = "grey30") +
+  annotate("segment",x = oldest_depth/100, y = 0, xend = -oldest_depth/100, yend = oldest, colour = "grey30") +
+  annotate("text", x = 3, y = 15, label = paste0("lowest artefacts (", round(oldest,0), " ka BP)"), size = 3) +
   # lines for dense concentration at 2.5 m
-  geom_segment(aes(x = 2.5, y = dense, xend = 4.75, yend = dense), colour = "grey30") +
-  geom_segment(aes(x = 2.5, y = 0, xend = 2.5, yend = dense), , colour = "grey30") +
-  annotate("text", x = 2.2, y = 15, label = paste0("base of dense \noccupation layer (", round(dense,0), " ka BP)"), size = 3) +
+  annotate("segment", x = base_of_dense_depth/100, y = dense, xend = -4.75, yend = dense, colour = "grey30") +
+  annotate("segment", x = base_of_dense_depth/100, y = 0, xend = -base_of_dense_depth/100, yend = dense, , colour = "grey30") +
+  annotate("text", x = 2.5, y = 15, label = paste0("base of dense \noccupation layer (", round(dense,0), " ka BP)"), size = 3) +
   
   theme_bw() +
   coord_flip() + # rotate
@@ -113,38 +122,43 @@ ggsave(file=paste0(directory, "MKII_dates_from_1989_for_paper.svg"), width = 200
 # the some minor edits in inkscape to make the data point labels more readable
 ```
 
-```{r difference-in-slope}
-# Looking into the question of difference in slope of 
-# regression lines using data from 1989
+```{r difference-in-slope-plot}
 
-
-# separate OSL and C14 dates to test for slope for paper on 1989 data
-OSL <- dates_1989[grepl("TL", dates_1989$Method),]
-C14 <- dates_1989[!grepl("TL", dates_1989$Method),]
-
-# investigate regressions of depth-age by method
-summary(m1 <- aov( Depth.m ~ age2plot * Method, data = dates_1989))
-# significant difference interaction, These results suggest that the slope of the regression between date and depth width is not similar for the two dating methods. 
-
-# more parsimonious model is fit without the interaction to test for a significant differences in the slope. 
-summary(m2 <- aov( Depth.m ~ age2plot + Method, data = dates_1989))
-
-anova(m1,m2)
-# removing the interaction DOES significantly affect the fit of the model.  We observe that for the dates, the method has a significant and positive effect on age and the effect is different for C14 and OSL 
-
-summary(OSL_mod <- lm(age2plot ~ Depth.m, data=OSL)) # slope 24658 err 2150
-summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) # slope 8016  err 1394 
+summary(OSL_mod <- lm(age2plot ~ Depth.m, data=OSL)) # 
+summary(C14_mod <- lm(age2plot ~ Depth.m, data=C14)) #
 # diff in slopes over
 # the standard error of the difference between the two slopes
+dates_1989$Two_methods <- ifelse(dates_1989$Method == "TL"|dates_1989$Method == "OSL", "OSL/TL", ifelse(dates_1989$Method == "C14"| dates_1989$Method == "ABOX", "C14", "NA"))
 
 # plot
 library(ggplot2)
-ggplot(dates_1989, aes(age2plot, Depth.m, colour = Method)) +
+ggplot(dates_1989, aes(age2plot, Depth.m, colour = Two_methods)) +
   geom_point(size = 3) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal(base_size = 14) +
-  scale_y_reverse()
+  scale_y_reverse() + 
+  ylab("meters below surface") + xlab("x 1000 years cal. BP") 
+```
 
+Plotting the linear regression lines for OSL/TL ages against radiocarbon ages suggests that the slopes of the lines are not the same. We can explore this further by comparing the models directly.
+
+
+```{r difference-in-slope-1}
+# Looking into the question of difference in slope of 
+# regression lines using data from 1989
+
+# separate OSL and C14 dates to test for slope for paper on 1989 data
+OSL_TL <- dates_1989[grepl("TL", dates_1989$Two_methods),]
+C14 <- dates_1989[!grepl("TL", dates_1989$Two_methods),]
+
+# investigate regressions of depth-age by method
+summary(m1 <- aov( Depth.m ~ age2plot * Two_methods, data = dates_1989))
+# significant difference interaction, These results suggest that the slope of the regression between date and depth width is not similar for the two dating methods.
+```
+
+Computing a linear model with depth and age using the two dating methods as a cross to test for interaction between them gives a significant difference, with a p-value of `r anova(m1)$'Pr(>F)'[3]`. 
+
+```{r  difference-in-slope-2}
 # now limit to upper 178 cm
 upper <- dates_1989[dates_1989$Depth.m < 1.78, ]
 
@@ -155,7 +169,7 @@ C14 <- upper[!grepl("OSL", upper$Method),]
 
 # investigate regressions of depth-age by method
 # from http://r-eco-evo.blogspot.com/2011/08/comparing-two-regression-slopes-by.html
-summary(m1 <- aov( Depth.m ~ age2plot * Method, data = upper))
+summary(m1 <- aov( Depth.m ~ age2plot * Two_methods, data = upper))
 # NO significant difference interaction, These results suggest that the slope of the regression between cal.date and depth width is not similar for the two dating methods. 
 
 # more parsimonious model is fit without the interaction to test for a significant differences in the slope. 
@@ -242,7 +256,10 @@ ggplot(upper, aes(age2plot, Depth.m, colour = Method)) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal(base_size = 14) +
   scale_y_reverse()
+```
 
+
+```{r change-point-analysis}
 #### bayesian change point analysis on sedimentation rates
 
 library(bcp)
@@ -382,14 +399,13 @@ ggplot(sub, aes(age2plot, Depth.m, colour = Method)) +
   geom_smooth(method = "lm", se = FALSE) +
   theme_minimal(base_size = 14) +
   scale_y_reverse()
+```
 
 
 
 
 
-
-
-
+```{r}
 ################################################################################
 # interpolate age from loess line with depth
 cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989)
@@ -428,10 +444,21 @@ library(strucchange)
 efp <- efp(depth ~ cal.date, c14_all,type = "OLS-CUSUM")
 plot(efp(depth ~ cal.date, c14_all, type = "OLS-CUSUM"))
 plot(Fstats(depth ~ cal.date, data=c14_all))
+```
 
 
 
+## The Revised Chronology 
 
+Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretations—stressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation — we confirm here that the lowest artefacts occur in Spit 49, 2.76 – 2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
+
+At the time of Roberts et al.’s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001 – 17,429 cal BP, overlapping at 1σ with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allen’s (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1σ with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1σ of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
+
+Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to 178 cm bs. A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost 178 cm of deposit (Bayesian estimation of difference in means = -0.309, 95% HDI - 8.27 – 0.020). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990). 
+
+The full suite of available 14C and luminescence ages for the site are both shown in Figure 5. The locally weighted regression line of best fit for these dates shows several changes in sedimentation rate but no obvious hiatus. Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is 0.934 at 24 ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is 0.922 at 65 ka). Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = 3.7, 95% HDI -2.13 – 9.38). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
+
+ 
 
 
 
