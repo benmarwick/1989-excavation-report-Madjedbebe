@@ -7,7 +7,6 @@ output: html_document
 
 # Supplementary details supporting the analysis of lithics from the 1989 excavations at Madjebebe (Malakanunja II)
 
-# Lithics 
 
 
 ```{r load-data}

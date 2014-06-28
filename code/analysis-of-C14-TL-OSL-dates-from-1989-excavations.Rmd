@@ -5,10 +5,7 @@ date: Thursday, June 26, 2014
 output: html_document
 ---
 
-# Supplementary details supporting the analysis of information from the 1989 excavations at Madjebebe (Malakanunja II)
-
-
-
+# Supplementary details supporting the analysis of ages from the 1989 excavations at Madjebebe (Malakanunja II)
 
 
 ```{r read-in-data}

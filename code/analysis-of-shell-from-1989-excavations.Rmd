@@ -1,9 +1,11 @@
 ---
 title: ""
 author: Ben Marwick
-date: Saturday, June 28, 2014
+date: Thursday, June 26, 2014
 output: html_document
 ---
+
+# Supplementary details supporting the analysis of shells from the 1989 excavations at Madjebebe (Malakanunja II)
 
 ```{r load-data}
 directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/"
@@ -36,16 +38,21 @@ shells <- shells[, c("Spit", "P. coaxans", "T. telescopium", "Cerithidea sp.", "
 shells <- shells[with(shells, order(gsub("[[:alpha:]]", "", shells$Spit)  )), ]
 
 # reshape
+library(reshape2)
 shells_m <- melt(shells, id = 'Spit')
 shells_m$value  <- as.numeric(shells_m$value)
 
 # plot mass
+library(ggplot2)
 plot_mass <- ggplot(shells_m, aes(Spit, value)) +
   geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
   theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   ylab("Mass (g)") +
   xlab("Square and spit") +
-  scale_fill_discrete(name="Taxon")
+  scale_fill_discrete(name="Taxon") +
+  theme(aspect.ratio = 1) 
+  
 
 # compute percent of spit total
 shells[, c("P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")] <- sapply(shells[, c("P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")], as.numeric)
@@ -61,8 +68,7 @@ for(i in 1:nrow(shells_perc)){
 }
 
 df$Spit <- shells$Spit
-
-# reshape
+library(reshape2)
 df_m <- melt(df, id = 'Spit')
 df_m$value  <- as.numeric(df_m$value)
 
@@ -70,17 +76,21 @@ df_m$value  <- as.numeric(df_m$value)
 plot_perc <- ggplot(df_m, aes(Spit, value)) +
   geom_bar(aes(fill = variable), position = "dodge", stat="identity") +
   theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   ylab("Percentage mass") +
   xlab("Square and spit") +
-  scale_fill_discrete(name="Taxon")
+  scale_fill_discrete(name="Taxon") +
+  theme(aspect.ratio = 1)
+```
+
+
+```{r draw-plot}
 
 # plot side by side
 require(gridExtra)
 plot1 <- plot_mass  # + guides(fill=FALSE)
 plot2 <- plot_perc
 grid.arrange(plot1, plot2, ncol=2)
-  
-
 ```
 
 
@@ -110,6 +120,9 @@ DE30[is.na(DE30)] <- 0
 DE30_prop_spit <- prop.table(as.matrix(DE30), margin=2)*100
 # convert to proportions of totals for each spit
 DE30_prop_spec <- prop.table(as.matrix(DE30), margin=1)*100
+```
+
+```{r reshape-plot,echo = FALSE, eval = FALSE}
 library(reshape2)
 DE30_prop_spit_m <- melt(DE30_prop_spit, id = row.names)
 DE30_prop_spec_m <- melt(DE30_prop_spec, id = row.names)
