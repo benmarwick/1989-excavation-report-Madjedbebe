@@ -301,12 +301,11 @@ A test of the difference between the correlation coefficients for the linear reg
 
 library(bcp)
 
-
 # interpolate age from loess line with depth
 # this is for the lines that show oldest artefact, etc.
 cal.date.lo <- loess(age2plot ~ Depth.m, dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),] , span = 0.4) # exclude ABOX dates
 cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 5, 0.01)))
-plot(cal.date.pr)
+# plot(cal.date.pr)
 cal.date.pr <- data.frame(age = cal.date.pr, depth = names(cal.date.pr))
 
 # do cp analysis on loess line
