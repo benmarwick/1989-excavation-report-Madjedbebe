@@ -1,3 +1,12 @@
+---
+title: ""
+author: Ben Marwick
+date: Thursday, June 26, 2014
+output: html_document
+---
+
+# Supplementary details supporting the analysis of lithics from the 1989 excavations at Madjebebe (Malakanunja II)
+
 # Lithics 
 
 
