@@ -58,3 +58,9 @@ KTL-164 45 +/- 7 ka
 
 All except two C14 dates were changed after doing the calibrations again. 
 
+#### Editing the text in the section 'Revised Chronology'
+
+
+
+
+
