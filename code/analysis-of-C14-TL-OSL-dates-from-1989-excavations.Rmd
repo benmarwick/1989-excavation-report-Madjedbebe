@@ -7,15 +7,19 @@ output: html_document
 
 # Supplementary details supporting the analysis of ages from the 1989 excavations at Madjebebe (Malakanunja II)
 
-
-```{r read-in-data}
-# plot all dates for 1989 paper, colour by method
-# raw data from text table in....
-directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/"
-dates_1989 <- read.csv(paste0(directory, "data/Date_table_from_paper_on_1989_dig.csv"))
+```{r, message=FALSE, echo=FALSE}
+# This is necessary to direct knitr to find the 
+# 'code', 'data', and other directories that contain
+# files needed to execute this document
+knitr::opts_knit$set(root.dir=normalizePath('../'))
 ```
 
-
+```{r read-in-data, echo=FALSE, messages = FALSE}
+# plot all dates for 1989 paper, colour by method
+# raw data from text table in....
+dates_1989 <- read.csv("data/Date_table_from_paper_on_1989_dig.csv")
+suppressMessages(source("code/libraries.R"))
+```
 
 ```{r clean-up}
 # clean up depth, where there's a range, get midpoint
@@ -30,7 +34,7 @@ dates_1989$Depth.cm[grep("-", dates_1989$Depth.cm)] <- midpoint
 dates_1989$Depth.m <- as.numeric(dates_1989$Depth.cm)/100 # in meters
 
 # get the median value from OxCal output
-oxcal_medians <- read.csv(paste0(directory, "data/Date_table_from_paper_on_1989_dig_C14_OxCal_output.csv"))
+oxcal_medians <- read.csv("data/Date_table_from_paper_on_1989_dig_C14_OxCal_output.csv")
 
 # get lab sample ID for matching
 matching <- c("R_Date", " ")
@@ -116,9 +120,13 @@ ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
 
 
 # save plot as SVG for finessing...
-ggsave(file=paste0(directory, "MKII_dates_from_1989_for_paper.svg"), width = 200, height = 200, units = "mm")
+ggsave(file="figures/MKII_dates_from_1989_for_paper.svg", width = 200, height = 200, units = "mm")
 # the some minor edits in inkscape to make the data point labels more readable
 ```
+
+Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretations—stressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation — we confirm here that the lowest artefacts occur in Spit 49, 2.76 – 2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
+
+At the time of Roberts et al.’s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001 – 17,429 cal BP, overlapping at 1σ with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allen’s (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1σ with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1σ of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
 
 ```{r difference-in-slope-plot}
 
@@ -199,8 +207,6 @@ a3 <- sprintf("%.3f",anova(m2, m3)$`Pr(>F)`[2])
 
 We can fit a more parsimonious model without the interaction to test for significant differences in slope. We can compare the two models for each dating method with ANOVA to assess if removing the interaction significantly affects the fit of the model. The result is that removing the interaction does not significantly effect the fit of the model. There is still no significant effect of dating method on the slope of the age-depth lines (p = `r a3`)
 
-
-
 ```{r difference-in-slope-bayes-1} 
 # Still looking at just the upper 2 m, now do Bayesian approach... 
 
@@ -241,12 +247,11 @@ summary(posterior2)
 x2_post <- as.numeric(posterior2[,2])
 
 # plot the two together
-p1 <- hist(x2_post, breaks = 100)                   
-p2 <- hist(x1_post, breaks = 100) 
+p1 <- hist(x2_post, breaks = 100, plot = FALSE)                   
+p2 <- hist(x1_post, breaks = 100, plot = FALSE) 
 plot( p2, col=rgb(1,1,0,1/4),main = parse(text='Posterior~of~Slope~of~""^14*C~and~OSL~dates'))
 plot( p1, col=rgb(0,0,1,1/4), add=T) 
 ```
-
 
 ```{r difference-in-slope-bayes-2, eval = FALSE}
 # now compare the two distributions of slopes
@@ -255,22 +260,30 @@ plot( p1, col=rgb(0,0,1,1/4), add=T)
 # devtools::install_github('mikemeredith/BEST')
 library(BEST)
 slopes_test <- BESTmcmc(x1_post, x2_post, verbose = TRUE)
+# save to file so we can use this or a previously saved version 
+# of the output
+save(slopes_test, file="data/slopes_test.rda")
+
+# key output is muDiff from summary
+# http://cran.r-project.org/web/packages/BEST/vignettes/BEST.pdf
+```
+
+```{r paste-in-results}
+# since the MCMC is quite time consuming,I've included the output
+# from a run so we can use that rather than redo the analysis. To
+# redo the analysis, simply run the code in the previous chunk.
+load("data/slopes_test.rda")
 summary(slopes_test)
 print(slopes_test)
 plot(slopes_test)
-windows()
-plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
-        ROPEeff=c(-0.2,0.2), compValm=0.5) 
-pairs(slopes_test)
-# key output is muDiff from summary
-# http://cran.r-project.org/web/packages/BEST/vignettes/BEST.pdf
-# put this text in the para
-# `r round(summary(slopes_test)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test)[3, 5:6]),2)`)
+# windows()
+# plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
+#         ROPEeff=c(-0.2,0.2), compValm=0.5) 
+# pairs(slopes_test)
 
 ```
 
-A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = 
-<!--- (Insert values from long run) --->
+Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to two meters below the surface (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = `r round(summary(slopes_test)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test)[3, 5:6]),2)`, the interval includes zero, indicating no credible difference). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990).
 
 
 ```{r change-point-analysis}
@@ -285,17 +298,12 @@ cal.date.pr <- predict(cal.date.lo, data.frame(Depth.m = seq(0, 5, 0.01)))
 # plot(cal.date.pr)
 cal.date.pr <- data.frame(age = cal.date.pr, depth = names(cal.date.pr))
 
-# do cp analysis on loess line
-cp <- bcp(as.numeric(na.omit(cal.date.pr$age)))
-plot(cp)
-legacyplot(cp)
-
 # do cp analysis on dates 
 # put in order of depth
 dates_1989 <- dates_1989[with(dates_1989, order(Depth.m)), ]
 cp <- bcp(as.numeric(dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]$age2plot))
 plot(cp)
-legacyplot(cp)
+# legacyplot(cp)
 cp
 
 # what samples are at these change points?
@@ -306,17 +314,109 @@ probs <- cbind(dates_no_ABOX, cp$posterior.prob)
 hi_probs <- probs[cp$posterior.prob > 0.9, ]
 ```
 
-Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is  `r round(hi_probs[1,]$"cp$posterior.prob",2)` at `r round(hi_probs[1,]$age2plot,0)` ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is `r round(hi_probs[2,]$"cp$posterior.prob",2)` at `r round(hi_probs[2,]$age2plot,0)` ka).
+Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is  `r round(hi_probs[1,]$"cp$posterior.prob",3)` at `r round(hi_probs[1,]$age2plot,0)` ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is `r round(hi_probs[2,]$"cp$posterior.prob",3)` at `r round(hi_probs[2,]$age2plot,0)` ka).
 
-## The Revised Chronology 
 
-Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretations—stressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation — we confirm here that the lowest artefacts occur in Spit 49, 2.76 – 2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
+```{r sed-rates-15-20-ka}
+# check 15 – 20 ka sedimentation rates
+# examine slope from KTL97 through KTL165 compare C14 to OSL
+# now limit for depth range KTL97 through KTL165
 
-At the time of Roberts et al.’s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001 – 17,429 cal BP, overlapping at 1σ with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allen’s (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1σ with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1σ of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
+# get depths of those dates
+KTL97_depth <- dates_1989[dates_1989$Lab.Code == "KTL97", ]$Depth.m
+# two values for KTL162, both the same, let's just get one
+KTL165_depth <- dates_1989[dates_1989$Lab.Code == "KTL165", ]$Depth.m[1]
 
-Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to two meters below the surface (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = -0.309, 95% HDI - 8.27 – 0.020). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990). 
+# subset all dates in the region of KTL97 - KTL165
+sub <- dates_1989[dates_1989$Depth.m %in% seq(KTL165_depth,KTL97_depth ,0.001), ]
+# plot
+ggplot(sub, aes(age2plot, Depth.m, colour = Two_methods)) +
+  geom_point(size = 1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  theme_minimal(base_size = 14) +
+  scale_y_reverse() + 
+  geom_text(aes(label = Lab.Code), size = 3, hjust=1, vjust=1) + 
+  ylab("meters below surface") + xlab("x 1000 years cal. BP")
 
-The full suite of available 14C and luminescence ages for the site are both shown in Figure 5. The locally weighted regression line of best fit for these dates shows several changes in sedimentation rate but no obvious hiatus. Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is 0.934 at 24 ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is 0.922 at 65 ka). Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = 3.7, 95% HDI -2.13 – 9.38). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
+# separate OSL and C14 dates to test for slope
+sub$Method <- ifelse(grepl("TL", sub$Method), "OSL", "C14")
+sub_OSL <- sub[grepl("OSL", sub$Method),]
+sub_C14 <- sub[!grepl("OSL", sub$Method),]
+
+# investigate regressions of depth-age by method
+summary(m1 <- aov( Depth.m ~ age2plot * Method, data = sub))
+summary(m2 <- aov( Depth.m ~ age2plot + Method, data = sub))
+anova(m1,m2)
+```
+
+```{r bayesian-slope-diff}
+library(MCMCpack)
+posterior1 <- (MCMCregress(age2plot ~ Depth.m, data=sub_OSL ))
+raftery.diag(posterior1)
+summary(posterior1)
+
+# get distribution of slope
+x1_post <- as.numeric(posterior1[,2])
+
+# trim extreme values cf. https://stat.ethz.ch/pipermail/r-help/2010-August/247632.html
+prob = c(0.47, 0.53)
+.limit <- quantile(x1_post, prob=prob)
+trm <- subset(x1_post, x1_post >= .limit[1] & x1_post <= .limit[2])
+quantile(trm) # check to see if we've removed some of the extreme values
+x1_post <- trm
+
+posterior2 <- (MCMCregress(age2plot ~ Depth.m, data=sub_C14))
+raftery.diag(posterior2)
+summary(posterior2)
+
+# get distribution of slope
+x2_post <- as.numeric(posterior2[,2])
+
+# trim  cf. https://stat.ethz.ch/pipermail/r-help/2010-August/247632.html
+.limit <- quantile(x2_post, prob=prob)
+trm <- subset(x2_post, x2_post >= .limit[1] & x2_post <= .limit[2])
+quantile(trm) # check to see if we've removed some of the extreme values
+x2_post <- trm
+
+# plot the two together
+p1 <- hist(x2_post, breaks = 100, plot = FALSE)                   
+p2 <- hist(x1_post, breaks = 100, plot = FALSE) 
+plot( p2, col=rgb(1,0,0,1/4),main = parse(text='Posterior~of~Slope~of~""^14*C~and~OSL~dates~(late~Pleistocene)'))
+plot( p1, col=rgb(0,1,0,1/4), add=T) 
+```
+
+```{r another-mcmc, eval=FALSE}
+# now compare the two distributions of slopes
+
+# BEST http://www.indiana.edu/~kruschke/BEST/
+# devtools::install_github('mikemeredith/BEST')
+library(BEST)
+slopes_test_sub <- BESTmcmc(x1_post, x2_post, verbose = TRUE)
+# save to file so we can use this or a previously saved version 
+# of the output
+save(slopes_test_sub, file="data/slopes_test_sub.rda")
+
+# key output is muDiff from summary
+# http://cran.r-project.org/web/packages/BEST/vignettes/BEST.pdf
+
+```
+
+```{r paste-in-results-again}
+# since the MCMC is quite time consuming,I've included the output
+# from a run so we can use that rather than redo the analysis. To
+# redo the analysis, simply run the code in the previous chunk.
+load("data/slopes_test_sub.rda")
+summary(slopes_test_sub)
+print(slopes_test_sub)
+plot(slopes_test_sub)
+# windows()
+# plotAll(slopes_test_sub, credMass=0.8, ROPEm=c(-0.1,0.1), 
+#         ROPEeff=c(-0.2,0.2), compValm=0.5) 
+# pairs(slopes_test_sub)
+
+```
+
+Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = `r round(summary(slopes_test_sub)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test_sub)[3, 5:6]),2)`, the interval includes zero, indicating no credible difference). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
 
  
 

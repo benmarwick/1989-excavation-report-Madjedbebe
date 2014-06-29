@@ -7,21 +7,28 @@ output: html_document
 
 # Supplementary details supporting the analysis of lithics from the 1989 excavations at Madjebebe (Malakanunja II)
 
+```{r, message=FALSE, echo=FALSE}
+# This is necessary to direct knitr to find the 
+# 'code', 'data', and other directories that contain
+# files needed to execute this document
+knitr::opts_knit$set(root.dir=normalizePath('../'))
+```
 
 
-```{r load-data}
+```{r load-data, echo=FALSE}
 # assumes you've set the directory earlier when running the
 # code for lithicsing, if not, uncomment and run this next line
-directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/"
-lithics <- read.csv(paste0(directory, "data/Lithics_table_from_paper_on_1989_dig.csv"))
-dates_1989 <- read.csv(paste0(directory, "data/Date_table_from_paper_on_1989_dig.csv"))
+
+lithics <- read.csv("data/Lithics_table_from_paper_on_1989_dig.csv")
+dates_1989 <- read.csv("data/Date_table_from_paper_on_1989_dig.csv")
+suppressMessages(source("code/libraries.R"))
 ```
 
 
 ```{r purl1, echo=FALSE}
 # get several chunks from the doc on analysing the dates
 library(knitr)
-invisible(purl('analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
+invisible(purl('code/analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
 read_chunk("temp")
 ```
 
@@ -35,7 +42,7 @@ unlink("temp")
 ```{r purl2, echo=FALSE}
 # get several chunks from the doc on analysing the dates
 library(knitr)
-invisible(purl('analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
+invisible(purl('code/analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
 read_chunk("temp")
 ```
 
@@ -47,6 +54,7 @@ unlink("temp")
 ```
 
 ```{r clean-data}
+# Now onto the lithic data...
 
 # filter the data for display (remove some dates )
 lithics$C14 <- as.numeric(as.character(lithics$C14))
@@ -241,5 +249,5 @@ ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = raw
   theme_minimal(base_size = 16)
 
 # save plot as SVG for finessing...
-ggsave(file = paste0(directory, "figures/lithics_proportions_from_1989_for_paper.svg"))
+ggsave(file = "figures/lithics_proportions_from_1989_for_paper.svg")
 ```

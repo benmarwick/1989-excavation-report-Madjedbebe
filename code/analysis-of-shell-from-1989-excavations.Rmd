@@ -7,9 +7,18 @@ output: html_document
 
 # Supplementary details supporting the analysis of shells from the 1989 excavations at Madjebebe (Malakanunja II)
 
+```{r, message=FALSE, echo=FALSE}
+# This is necessary to direct knitr to find the 
+# 'code', 'data', and other directories that contain
+# files needed to execute this document
+knitr::opts_knit$set(root.dir=normalizePath('../'))
+```
+
+
 ```{r load-data}
-directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/"
-shells <- read.csv(paste0(directory, "data/Shell_table_from_paper_on_1989_dig.csv"), header=TRUE, stringsAsFactors = FALSE)
+
+shells <- read.csv("data/Shell_table_from_paper_on_1989_dig.csv", header=TRUE, stringsAsFactors = FALSE)
+suppressMessages(source("code/libraries.R"))
 ```
 
 
