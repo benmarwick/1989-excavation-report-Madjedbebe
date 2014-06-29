@@ -11,8 +11,13 @@
 # be right to run the rest of the code in this repository 
 # after this:
 
+install.packages("devtools")
+install_github("rstudio/packrat")
 packrat::unbundle()
 
+
+
+###########################################################
 # Setup instructions for me to use when preparing this repository
 
 # just do this once when starting to word on project

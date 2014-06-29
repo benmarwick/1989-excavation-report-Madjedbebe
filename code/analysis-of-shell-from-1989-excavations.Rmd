@@ -102,8 +102,9 @@ require(gridExtra)
 plot1 <- plot_mass  # + guides(fill=FALSE)
 plot2 <- plot_perc
 grid.arrange(plot1, plot2, ncol=2)
+ g <- arrangeGrob(plot1, plot2, ncol=2)
 # save plot as SVG for finessing...
-ggsave(file = "figures/shell_from_1989_for_paper.svg")
+ggsave(file = "figures/shell_from_1989_for_paper.svg", g)
 ```
 
 
