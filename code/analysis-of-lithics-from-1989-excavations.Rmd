@@ -73,21 +73,21 @@ lithics <- lithics[!(is.na(lithics$Total.Artefacts)),]
 ```{r plot-data}
 # plot
 library(ggplot2)
+
 ggplot(lithics, aes(Spit, Total.Artefacts)) +
   geom_bar(stat="identity") +
   theme_minimal(base_size = 12) +
   ylab("Number of stone artefacts >6 mm") +
-  annotate("text", x = lithics$Spit, y = (lithics$Total.Artefacts + 100), label = round(lithics$C14, 3), size = 4) +
-  annotate("text", x = lithics$Spit, y = (lithics$Total.Artefacts + 280), label = round(lithics$OSL, 3), colour = "red", fontface="bold.italic", size = 4) +
-  ylim(0,600)
+  annotate("text", x = lithics$Spit, y = 615, label = round(lithics$C14, 0), size = 4) +
+  annotate("text", x = lithics$Spit, y = 615, label = round(lithics$OSL, 0), colour = "red", fontface="bold.italic", size = 4) +
+  annotate("text", x = 50, y = 615, label = "ka BP",size = 4) +
+  ylim(0,615)
+
+# save plot as SVG for finessing...
+ggsave(file = "figures/lithics_over_time_from_1989_for_paper.svg")
+
 
 # plot with ka along x-axis to help read peaks
-
-# assumes you run all the code already for working with dates...
-# cal.date.pr # interpolated ages to known depths
-
-########### problem with two excel files for lithic data that seem to be slightly different! 
-
 
 
 # prepare spit and depth data for showing on the plot
@@ -186,6 +186,7 @@ ggplot(interpolated_ages, aes(mid, Total.Artefacts)) +
   ylim(0,600) +
   scale_x_continuous(breaks = seq(0, 3, 0.5))
 
+
 ```
 
 Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 6, Table 2). These show distinct pulses of accumulation, centred around 5, 7, 12.5, 18.4, 36, and 45 – 52 ka (Figure 6). Between Spits 37 – 39 (2.2 – 2.4 m bs) there are 1900 flaked stone artefacts from the 7 mm sieve (including 41 of exotic chert), numerous pieces of high-grade haematite (totalling 4.92 kg, including seven ground pieces), 143 g of red or yellow ochre, pieces of dolerite (presumed to be fragments of edge-ground axes) and fragments of grindstones; a further 568 flaked stone artefacts and 344 pieces of haematite were recovered from the pit fill at this level. All of these are associated with, or are slightly beneath, a TL age of 45 ± 9 ka. Beneath this, in levels dating 52 ± 11 to 61 ± 13 ka there were an additional 82 flaked stone artefacts and 52 pieces of haematite recovered from the 7 mm sieve. This is a comparatively large assemblage from a trench measuring only 1 x 1.5 m. It is unlikely the quartzite stone artefacts derive from downward displacement of artefacts from the predominately quartz assemblage that overlies it.  
@@ -234,6 +235,7 @@ plot2 <- merge(plot1, cal.date.pr, by.x = "mid", by.y = "depth")
 library(reshape2)
 plot.m <- melt(plot2, id.vars = "age", measure.vars = c("Quartzite", "Silcrete", "Quartz", "Chert"))
 colnames(plot.m) <- c("age", "rawmaterial", "percentage")
+nlevels <- length(unique(plot.m$rawmaterial))
 
 library(ggplot2)
 ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = rawmaterial)) + 
@@ -246,8 +248,8 @@ ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = raw
   theme(axis.text.y = element_text(size = 15)) +
   theme(axis.title.x = element_text(size = 15)) +
   theme(axis.title.y = element_text(size = 15, angle = 90)) +
-  labs(colour = "Raw material") +
-  # guides(colour=FALSE) +  
+  scale_linetype_manual(values = 1:nlevels, name = "raw material") +
+scale_color_manual(values = c(brewer.pal(nlevels, "Set1")), name = "raw material") + 
   theme_minimal(base_size = 16)
 
 # save plot as SVG for finessing...

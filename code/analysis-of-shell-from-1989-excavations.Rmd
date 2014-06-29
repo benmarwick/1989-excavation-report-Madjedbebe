@@ -102,6 +102,8 @@ require(gridExtra)
 plot1 <- plot_mass  # + guides(fill=FALSE)
 plot2 <- plot_perc
 grid.arrange(plot1, plot2, ncol=2)
+# save plot as SVG for finessing...
+ggsave(file = "figures/shell_from_1989_for_paper.svg")
 ```
 
 
@@ -145,7 +147,6 @@ ggplot(data = DE30_prop_spec_m, aes(x = factor(Var1), y = value, fill = factor(V
 ggplot(data = DE30_prop_spec_m, aes(Var2, value)) + 
   geom_bar(stat="identity") + 
   facet_grid(. ~ Var1 ) 
-# save plot as SVG for finessing...
-ggsave(file = "figures/shell_from_1989_for_paper.svg")
+
 ```
 
