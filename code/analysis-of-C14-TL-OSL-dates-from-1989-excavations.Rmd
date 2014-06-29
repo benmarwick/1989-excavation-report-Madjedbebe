@@ -18,6 +18,8 @@ knitr::opts_knit$set(root.dir=normalizePath('../'))
 # plot all dates for 1989 paper, colour by method
 # raw data from text table in....
 dates_1989 <- read.csv("data/Date_table_from_paper_on_1989_dig.csv")
+# check that dependencies are locally available
+# source("code/packrat.r")
 suppressMessages(source("code/libraries.R"))
 ```
 
@@ -304,7 +306,6 @@ dates_1989 <- dates_1989[with(dates_1989, order(Depth.m)), ]
 cp <- bcp(as.numeric(dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]$age2plot))
 plot(cp)
 # legacyplot(cp)
-cp
 
 # what samples are at these change points?
 dates_no_ABOX <- dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]

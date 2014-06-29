@@ -18,6 +18,8 @@ knitr::opts_knit$set(root.dir=normalizePath('../'))
 ```{r load-data}
 
 shells <- read.csv("data/Shell_table_from_paper_on_1989_dig.csv", header=TRUE, stringsAsFactors = FALSE)
+# check that dependencies are locally available
+# source("code/packrat.r")
 suppressMessages(source("code/libraries.R"))
 ```
 
@@ -143,5 +145,7 @@ ggplot(data = DE30_prop_spec_m, aes(x = factor(Var1), y = value, fill = factor(V
 ggplot(data = DE30_prop_spec_m, aes(Var2, value)) + 
   geom_bar(stat="identity") + 
   facet_grid(. ~ Var1 ) 
+# save plot as SVG for finessing...
+ggsave(file = "figures/shell_from_1989_for_paper.svg")
 ```
 

@@ -21,6 +21,8 @@ knitr::opts_knit$set(root.dir=normalizePath('../'))
 
 lithics <- read.csv("data/Lithics_table_from_paper_on_1989_dig.csv")
 dates_1989 <- read.csv("data/Date_table_from_paper_on_1989_dig.csv")
+# check that dependencies are locally available
+# source("code/packrat.r")
 suppressMessages(source("code/libraries.R"))
 ```
 
@@ -245,7 +247,7 @@ ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = raw
   theme(axis.title.x = element_text(size = 15)) +
   theme(axis.title.y = element_text(size = 15, angle = 90)) +
   labs(colour = "Raw material") +
-  guides(linetype=FALSE) +  
+  # guides(colour=FALSE) +  
   theme_minimal(base_size = 16)
 
 # save plot as SVG for finessing...
