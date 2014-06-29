@@ -11,10 +11,9 @@
 # be right to run the rest of the code in this repository 
 # after this:
 
-install.packages("devtools")
-install_github("rstudio/packrat")
+if (!require("devtools")) install.packages("devtools")
+devtools::install_github("rstudio/packrat")
 packrat::unbundle()
-
 
 
 ###########################################################
