@@ -14,9 +14,37 @@ output: html_document
 # code for lithicsing, if not, uncomment and run this next line
 directory <- "E:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/MJB-1989-excavation-paper/"
 lithics <- read.csv(paste0(directory, "data/Lithics_table_from_paper_on_1989_dig.csv"))
+dates_1989 <- read.csv(paste0(directory, "data/Date_table_from_paper_on_1989_dig.csv"))
 ```
 
 
+```{r purl1, echo=FALSE}
+# get several chunks from the doc on analysing the dates
+library(knitr)
+invisible(purl('analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
+read_chunk("temp")
+```
+
+```{r ref.label='clean-up'}
+```
+
+```{r echo=FALSE}
+unlink("temp")
+```
+
+```{r purl2, echo=FALSE}
+# get several chunks from the doc on analysing the dates
+library(knitr)
+invisible(purl('analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
+read_chunk("temp")
+```
+
+```{r ref.label='interpolate'}
+```
+
+```{r echo=FALSE}
+unlink("temp")
+```
 
 ```{r clean-data}
 
@@ -133,20 +161,20 @@ interpolated_ages <- merge(x = interpolated_depths,
       all.x = TRUE)
 
 # plot with ages, the interpolation isn't very good
-# ggplot(interpolated_ages, aes(age, Total.Artefacts)) +
-#   geom_bar(stat="identity") +
-#   theme_minimal(base_size = 12) +
-#   ylab("Number of stone artefacts >6 mm")  +
-#   ylim(0,600) +
-#   scale_x_continuous(breaks = seq(0, 70, 5))
+ggplot(interpolated_ages, aes(age, Total.Artefacts)) +
+  geom_bar(stat="identity") +
+  theme_minimal(base_size = 12) +
+  ylab("Number of stone artefacts >6 mm")  +
+  ylim(0,600) +
+  scale_x_continuous(breaks = seq(0, 70, 5))
 
 # plot with depth
-# ggplot(interpolated_ages, aes(mid, Total.Artefacts)) +
-#   geom_bar(stat="identity") +
-#   theme_minimal(base_size = 12) +
-#   ylab("Number of stone artefacts >6 mm")  +
-#   ylim(0,600) +
-#   scale_x_continuous(breaks = seq(0, 3, 0.5))
+ggplot(interpolated_ages, aes(mid, Total.Artefacts)) +
+  geom_bar(stat="identity") +
+  theme_minimal(base_size = 12) +
+  ylab("Number of stone artefacts >6 mm")  +
+  ylim(0,600) +
+  scale_x_continuous(breaks = seq(0, 3, 0.5))
 
 ```
 
