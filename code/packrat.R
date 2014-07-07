@@ -13,13 +13,13 @@
 
 if (!require("devtools")) install.packages("devtools")
 devtools::install_github("rstudio/packrat")
-packrat::unbundle()
+packrat::restore()
 
 
 ###########################################################
 # Setup instructions for me to use when preparing this repository
 
-# just do this once when starting to word on project
+# just do this once when starting to work on project
 # packrat::init()
 
 
