@@ -3,6 +3,5 @@
 .RData
 *.svg
 *.Rproj
-*.md
 *.html
 packrat/lib*/
