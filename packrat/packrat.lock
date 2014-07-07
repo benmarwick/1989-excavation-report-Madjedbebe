@@ -22,11 +22,6 @@ Package: bitops
 Source: CRAN
 Version: 1.0-6
 
-Package: caTools
-Source: CRAN
-Version: 1.17
-Requires: bitops
-
 Package: coda
 Source: CRAN
 Version: 0.16-1
@@ -83,11 +78,6 @@ Package: htmltools
 Source: CRAN
 Version: 0.2.4
 Requires: digest
-
-Package: httpuv
-Source: CRAN
-Version: 1.3.0
-Requires: Rcpp
 
 Package: httr
 Source: CRAN
@@ -175,10 +165,6 @@ Source: CRAN
 Version: 3-13
 Requires: coda
 
-Package: RJSONIO
-Source: CRAN
-Version: 1.2-0.2
-
 Package: rmarkdown
 Source: github
 Version: 0.2.49
@@ -193,27 +179,13 @@ Source: CRAN
 Version: 0.2.4
 Requires: dichromat, labeling, munsell, plyr, RColorBrewer
 
-Package: shiny
-Source: CRAN
-Version: 0.10.0
-Requires: caTools, digest, htmltools, httpuv, RJSONIO, xtable
-
 Package: stringr
 Source: CRAN
 Version: 0.6.2
 
-Package: testthat
-Source: CRAN
-Version: 0.8.1
-Requires: digest
-
 Package: whisker
 Source: CRAN
 Version: 0.3-2
-
-Package: xtable
-Source: CRAN
-Version: 1.7-3
 
 Package: yaml
 Source: CRAN

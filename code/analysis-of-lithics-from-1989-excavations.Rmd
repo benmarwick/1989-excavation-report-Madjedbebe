@@ -19,8 +19,8 @@ knitr::opts_knit$set(root.dir=normalizePath('../'))
 # assumes you've set the directory earlier when running the
 # code for lithicsing, if not, uncomment and run this next line
 
-lithics <- read.csv("data/Lithics_table_from_paper_on_1989_dig.csv")
-dates_1989 <- read.csv("data/Date_table_from_paper_on_1989_dig.csv")
+lithics <- read.csv("data/Lithics_table_from_paper_on_1989_dig.csv",fileEncoding="latin1")
+dates_1989 <- read.csv("data/Date_table_from_paper_on_1989_dig.csv",fileEncoding="latin1")
 # check that dependencies are locally available
 # source("code/packrat.r")
 suppressMessages(source("code/libraries.R"))
@@ -37,23 +37,13 @@ read_chunk("temp")
 ```{r ref.label='clean-up'}
 ```
 
-```{r echo=FALSE}
-unlink("temp")
-```
-
-```{r purl2, echo=FALSE}
-# get several chunks from the doc on analysing the dates
-library(knitr)
-invisible(purl('code/analysis-of-C14-TL-OSL-dates-from-1989-excavations.Rmd', output="temp", quiet=TRUE))
-read_chunk("temp")
-```
-
 ```{r ref.label='interpolate'}
 ```
 
 ```{r echo=FALSE}
 unlink("temp")
 ```
+
 
 ```{r clean-data}
 # Now onto the lithic data...
