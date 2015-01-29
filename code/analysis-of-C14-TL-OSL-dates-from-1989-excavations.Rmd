@@ -1,5 +1,3 @@
-
-
 ---
 title: ""
 author: Ben Marwick
@@ -79,8 +77,8 @@ bayes_values <- bayes_slopes_chrono_data(ancova_p_values$upper)
 # redo the analysis, simply run the code in the previous chunk.
 load("data/slopes_test.rda")
 summary(slopes_test)
-print(slopes_test)
-plot(slopes_test)
+# print(slopes_test)
+# plot(slopes_test)
 # windows()
 # plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
 #         ROPEeff=c(-0.2,0.2), compValm=0.5) 
@@ -114,7 +112,8 @@ bayes_slope_posteriors <- bayes_slope_difference(sed_rates_15_to_20_result$sub_O
 ```
 
 ```{r another-mcmc, eval=FALSE}
-bayes_slope_difference_result <- bayes_slope_test(bayes_slope_difference_result$x1_post,
+# rather time consuming, >30 min
+# bayes_slope_difference_result <- bayes_slope_test(bayes_slope_difference_result$x1_post,
                                                   bayes_slope_difference_result$x2_post)
 ```
 
@@ -124,8 +123,8 @@ bayes_slope_difference_result <- bayes_slope_test(bayes_slope_difference_result$
 # redo the analysis, simply run the code in the previous chunk.
 load("data/slopes_test_sub.rda")
 summary(slopes_test_sub)
-print(slopes_test_sub)
-plot(slopes_test_sub)
+# print(slopes_test_sub)
+# plot(slopes_test_sub)
 # windows()
 # plotAll(slopes_test_sub, credMass=0.8, ROPEm=c(-0.1,0.1), 
 #         ROPEeff=c(-0.2,0.2), compValm=0.5) 

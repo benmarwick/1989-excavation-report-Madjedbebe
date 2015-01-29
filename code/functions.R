@@ -766,8 +766,7 @@ plots_lithics_data <- function(lithics){
 #' }
 
 plots_lithics_rawmaterials <- function(lithics){
-  
-  
+
   
   # select raw materials that show time sensitive pattern
   Local.Coarse.Grained.Quartzite_perc <- with(lithics, (Local.Coarse.Grained.Quartzite/Total.Artefacts))
