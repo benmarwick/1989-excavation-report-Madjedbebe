@@ -919,70 +919,6 @@ addZone(x, Zones, col = 'red')
 # text(10, 59.5, labels = "Pit feature")
 
 }
-############################################################
-#' Differences in assemblage technology above and below the pit lens
-#'
-#'
-#'
-#' @export
-#' @examples
-#' \dontrun{
-#' lens_differences_tech_plot <- lens_differences_tech()
-#' }
-
-lens_differences_tech <- function(){
-
-
-dat_tech <- read.csv("data/MJB technological features-2.csv")
-
-
-dat_tech$part <- with(dat_tech, ifelse(Spit %in% c(37:40), 'above',
-                                       ifelse(Spit %in% c("41 / 43", "62 Pit"), 'lens',
-                                              ifelse(Spit %in% c(42, 44:49), 'below',
-                                                     "who_cares"))))
-
-library("dplyr")
-library("reshape2")
-dat_tech1 <- dat_tech %>%
-  melt() %>%
-  filter(variable %in% c("Convergent.flakes", "Thinning.Flakes", "Scrapers"  )) %>%
-  filter(part %in% c("above", "lens", "below")) %>%
-  group_by(part, variable) %>%
-  summarise (n = sum(value, na.rm = TRUE)) %>%
-  mutate(percentage = round(n / sum(n, na.rm = TRUE) * 100, 2))
-
-library("ggplot2")
-ggplot(dat_tech1, aes(variable, percentage)) +
-  geom_bar(stat = "identity") +
-  facet_grid( ~ part) +
-  theme(axis.text.x  = element_text(angle=90, vjust=0.5)) +
-  theme_minimal()
-
-
-
-# put things in order for the plot
-dat_tech1$part <- factor(dat_tech1$part, levels = c('above', 'lens', 'below'))
-
-n <- 15
-ggplot(dat_tech1, aes(part, percentage, fill = variable)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  xlab("location relattive to lens") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = n)) +
-  theme(axis.text.y = element_text(size = n)) +
-  theme(axis.title.x = element_text(size = n)) +
-  theme(axis.title.y = element_text(size = n, angle = 90))
-
-ggsave("figures/raw-materials-lens.png", width = par("din")[1] * 1.6)
-# Figures are not good match with what CC has in paper...
-
-dat_tech2 <- dcast(dat_tech1, part ~ variable, value.var = 'n')[,-1]
-
-tech_chi <- chisq.test(dat_tech2)
-# not sig, this seems to agree fine
-
-}
-
 
 ############################################################
 #' Differences in assemblage raw materials above and below the pit lens
@@ -998,65 +934,186 @@ tech_chi <- chisq.test(dat_tech2)
 lens_differences_raw <- function(){
 
 
-```{r}
-dat_raw <- read.csv("G:/My Documents/My UW/Research/1206 M2 excavation/Malakunanga 89 excavations/JHE-paper-on-1989-excavation/MJB-1989-excavation-paper/data/Lithics_table_from_paper_on_1989_dig.csv")
+  library("dplyr")
+  library("reshape2")
+  dat_raw <- read.csv("data/Lithics_table_from_paper_on_1989_dig.csv")
 
-dat_raw$part <- with(dat_raw, ifelse(Spit %in% c(37:40), 'above',
-                                     ifelse(Spit %in% c(41, 43, 62), 'pit',
-                                            ifelse(Spit %in% c(42, 44:49), 'below',
-                                                   "who_cares"))))
+  dat_raw$part <- with(dat_raw, ifelse(Spit %in% c(37:40), 'above',
+                                       ifelse(Spit %in% c(41, 43, 62), 'lens',
+                                              ifelse(Spit %in% c(42, 44:49), 'below',
+                                                     "who_cares"))))
 
-dat_raw[10:15,] <- apply(dat_raw[10:15,], 2, as.numeric)
+  dat_raw[10:15,] <- apply(dat_raw[10:15,], 2, as.numeric)
 
-dat_raw$Quartzite <- dat_raw %>%
-  select(Local.Coarse.Grained.Quartzite,
-         Fine.Grained.Exotic.Quartzite,
-         Brown.Quartzite) %>%
-  rowSums(na.rm = TRUE)
+  # combine Quartzite types
+  dat_raw$Quartzite <- dat_raw %>%
+    select(Local.Coarse.Grained.Quartzite,
+           Fine.Grained.Exotic.Quartzite,
+           Brown.Quartzite) %>%
+    rowSums(na.rm = TRUE)
 
+
+  # put things in order for the plot
+  dat_raw$part <- factor(dat_raw$part, levels = c('above', 'lens', 'below'))
+
+  dat_raw1 <- dat_raw %>%
+    melt() %>%
+    filter(variable %in% c("Quartz", "Quartzite", "Silcrete", "Chert" )) %>%
+    filter(part %in% c("above", "lens", "below")) %>%
+    group_by(part, variable) %>%
+    summarise (n = sum(value, na.rm = TRUE)) %>%
+    mutate(perc = round(n / sum(n, na.rm = TRUE) * 100, 2))
+
+  library("ggplot2")
+p1 <- ggplot(dat_raw1, aes(variable, perc)) +
+    geom_bar(stat = "identity") +
+    facet_grid( ~ part) +
+    theme_bw(base_size=18) +
+    theme(axis.text.x = element_text(angle=90)) +
+    xlab("") +
+    ylab("Percentage")
+
+ggsave("figures/raw-materials-lens.png", width = par("din")[1] * 1.6)
+
+p2 <- ggplot(dat_raw1, aes(part, perc, fill = variable)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    theme_minimal()
+
+  dat_raw2 <- dcast(dat_raw1, part ~ variable, value.var = 'n')[,-1]
+
+  chisq.test(dat_raw2)
+  # this seems to agree fine
+
+  # retouch to non-retouch
+
+  ret <- dat_raw %>%
+    melt() %>%
+    filter(variable %in% c("Retouched", "Total.Artefacts" )) %>%
+    filter(part %in% c("above", "lens", "below")) %>%
+    group_by(part, variable) %>%
+    summarise (n = sum(value, na.rm = TRUE)) %>%
+    mutate(perc = round(n / sum(n, na.rm = TRUE) * 100, 2))
+
+p3 <-   ggplot(ret, aes(part, perc, fill = variable)) +
+    geom_bar(stat="identity", position=position_dodge()) +
+    theme_minimal()
+
+  dat_ret <- dcast(ret, part ~ variable, value.var = 'n')[,-1]
+
+chsq <-   chisq.test(dat_ret)
+  # yes sig diff, but small cell values,
+fshr <-   fisher.test(dat_ret)
+  # still sig
+
+return(list(p1 = p1, p2 = p2, p3 = p3, chsq = chsq, fshr = fshr))
+
+}
+
+############################################################
+#' Differences in assemblage technology above and below the pit lens
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' lens_differences_tech_plot <- lens_differences_tech()
+#' }
+
+lens_differences_tech <- function(){
+
+dat_tech <- read.csv("data/MJB technological features-2.csv")
+
+
+dat_tech$part <- with(dat_tech, ifelse(Spit %in% c(37:40), 'above',
+                                       ifelse(Spit %in% c("41 / 43", "62 Pit"), 'lens',
+                                              ifelse(Spit %in% c(42, 44:49), 'below',
+                                                     "who_cares"))))
+# put things in order for the plot
+dat_tech$part <- factor(dat_tech$part, levels = c('above', 'lens', 'below'))
+
+# replace all NA with zero
+dat_tech[is.na(dat_tech)] <- 0
+
+dat_tech$Retouch <- with(dat_tech,  Bifacial.Points + Scrapers)
 
 library("dplyr")
 library("reshape2")
-dat_raw1 <- dat_raw %>%
-  melt() %>%
-  filter(variable %in% c("Quartz", "Quartzite", "Silcrete", "Chert" )) %>%
-  filter(part %in% c("above", "pit", "below")) %>%
-  group_by(part, variable) %>%
-  summarise (n = sum(value, na.rm = TRUE)) %>%
-  mutate(perc = round(n / sum(n, na.rm = TRUE) * 100, 2))
 
+# total count of types in each group
+dat_tech0 <- dat_tech %>%
+  melt() %>%
+  filter(variable %in% c("Convergent.flakes", "Thinning.Flakes", "Retouch"  )) %>%
+  filter(part %in% c("above", "lens", "below")) %>%
+  group_by(part) %>%
+  summarise(n = sum(value, na.rm = TRUE))
+
+sum_all_types <- sum(dat_tech0$n)
+
+dat_tech1 <- dat_tech %>%
+  melt() %>%
+  filter(variable %in% c("Convergent.flakes", "Thinning.Flakes", "Retouch"  )) %>%
+  filter(part %in% c("above", "lens", "below")) %>%
+  group_by(part, variable) %>%
+  summarise(n = sum(value, na.rm = TRUE))  %>%
+  mutate(percentage = n / sum(n, na.rm = TRUE) * 100)
+
+dat_tech_all <- dat_tech %>%
+  melt() %>%
+  filter(variable %in% c("Convergent.flakes", "Thinning.Flakes", "Retouch"  )) %>%
+  filter(part %in% c("above", "lens", "below")) %>%
+  group_by(part, variable) %>%
+  summarise(n = sum(value, na.rm = TRUE))  %>%
+  mutate(percentage = n / sum_all_types * 100)
+
+# divide count by total number of types in each group
+
+dat_tech2 <- inner_join(dat_tech0, dat_tech1, by = 'part')
+
+dcast(dat_tech1, part ~ variable)
+
+# The plot of the types in each zone by percentage of the count of types for each zone
 library("ggplot2")
-ggplot(dat_raw1, aes(variable, perc)) +
+p1 <- ggplot(dat_tech1, aes(variable, percentage)) +
   geom_bar(stat = "identity") +
-  facet_grid( ~ part)
+  facet_grid( ~ part) +
+  theme_bw(base_size = 16) +
+  theme(axis.text.x  = element_text(angle=90, vjust=0.5)) +
+  xlab("") +
+  ylab("Percentage")
 
-ggplot(dat_raw1, aes(part, perc, fill = variable)) +
+ggsave("figures/tech-lens-difference.png", width = par("din")[1] * 1.6)
+
+
+# The plot of the types in each zone by percentage of the entire count of types for spits
+ggplot(dat_tech_all, aes(variable, percentage)) +
+  geom_bar(stat = "identity") +
+  facet_grid( ~ part) +
+  theme_bw(base_size = 16) +
+  theme(axis.text.x  = element_text(angle=90, vjust=0.5)) +
+  xlab("") +
+  ylab("Percentage")
+
+# put things in order for the plot
+dat_tech1$part <- factor(dat_tech1$part, levels = c('above', 'lens', 'below'))
+
+n <- 15
+ggplot(dat_tech1, aes(part, percentage, fill = variable)) +
   geom_bar(stat="identity", position=position_dodge()) +
-  theme_minimal()
+  xlab("location relattive to lens") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = n)) +
+  theme(axis.text.y = element_text(size = n)) +
+  theme(axis.title.x = element_text(size = n)) +
+  theme(axis.title.y = element_text(size = n, angle = 90))
 
-dat_raw2 <- dcast(dat_raw1, part ~ variable, value.var = 'n')[,-1]
+dat_tech2 <- dcast(dat_tech1, part ~ variable, value.var = 'n')[,-1]
 
-chisq.test(dat_raw2)
-# this seems to agree fine
+tech_chi <- chisq.test(dat_tech2)
+# not sig, this seems to agree fine
 
-# retouch to non-retouch
+return(list(p1 = p1, tech_chi = tech_chi))
 
-ret <- dat_raw %>%
-  melt() %>%
-  filter(variable %in% c("Retouched", "Total.Artefacts" )) %>%
-  filter(part %in% c("above", "pit", "below")) %>%
-  group_by(part, variable) %>%
-  summarise (n = sum(value, na.rm = TRUE)) %>%
-  mutate(perc = round(n / sum(n, na.rm = TRUE) * 100, 2))
+}
 
-ggplot(ret, aes(part, perc, fill = variable)) +
-  geom_bar(stat="identity", position=position_dodge()) +
-  theme_minimal()
-
-dat_ret <- dcast(ret, part ~ variable, value.var = 'n')[,-1]
-
-chisq.test(dat_ret)
-# yes sig diff, but small cell values,
-fisher.test(dat_ret)
-# still sig
 
