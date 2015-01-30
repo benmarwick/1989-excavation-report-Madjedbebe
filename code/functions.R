@@ -104,7 +104,8 @@ interpolate_chrono_data <- function(dates_1989){
   return(list(oldest_depth = oldest_depth, 
               oldest = oldest, 
               base_of_dense_depth = base_of_dense_depth,
-              dense = dense))
+              dense = dense,
+              cal.date.lo = cal.date.lo))
 }
 
 
@@ -443,7 +444,9 @@ bayes_cp_test <- function(dates_1989){
   # where are the high probability change points?
   hi_probs <- probs[cp$posterior.prob > 0.9, ]
   
-  return(hi_probs)
+  return(list(hi_probs = hi_probs, 
+              cal.date.lo = cal.date.lo, 
+              cal.date.pr = cal.date.pr))
   
 }
 
@@ -630,10 +633,10 @@ clean_lithics_data <- function(lithics){
 #' @export
 #' @examples
 #' \dontrun{
-#' lithics_data_plotted <- plots_lithics_data(lithics_data)
+#' lithics_data_plotted <- plots_lithics_data(lithics_data, bayes_cp_result$cal.date.lo)
 #' }
 
-plots_lithics_data <- function(lithics){
+plots_lithics_data <- function(lithics, cal.date.lo){
   
   # plot
   library(ggplot2)
@@ -645,7 +648,7 @@ plots_lithics_data <- function(lithics){
     ylab("Number of stone artefacts >6 mm") +
     annotate("text", x = lithics$Spit, y = 615, label = round(lithics$C14, 0), size = 4) +
     annotate("text", x = lithics$Spit, y = 615, label = round(lithics$OSL, 0), colour = "red", fontface="bold.italic", size = 4) +
-    annotate("text", x = 50, y = 615, label = "ka BP",size = 4) +
+    annotate("text", x = 60, y = 615, label = "ka",size = 4) +
     ylim(0,615)
   p1
   # save plot as SVG for finessing...
@@ -751,7 +754,7 @@ plots_lithics_data <- function(lithics){
     ylim(0,600) +
     scale_x_continuous(breaks = seq(0, 3, 0.5))
   
-  
+return(list(p1 = p1, p2 = p2, p3 = p3, spit = spit))
 }
 
 ############################################################
@@ -762,10 +765,12 @@ plots_lithics_data <- function(lithics){
 #' @export
 #' @examples
 #' \dontrun{
-#' lithics_data_plotted <- plots_lithics_rawmaterials(lithics_data)
+#' lithics_rawmaterials_plotted <- plots_lithics_rawmaterials(lithics_data, 
+#'                                        lithics_data_plotted$spit, 
+#'                                        bayes_cp_result$cal.date.pr)
 #' }
 
-plots_lithics_rawmaterials <- function(lithics){
+plots_lithics_rawmaterials <- function(lithics, spit, cal.date.pr){
 
   
   # select raw materials that show time sensitive pattern
@@ -813,6 +818,7 @@ plots_lithics_rawmaterials <- function(lithics){
   colnames(plot.m) <- c("age", "rawmaterial", "percentage")
   nlevels <- length(unique(plot.m$rawmaterial))
   
+  library("RColorBrewer")
   library(ggplot2)
   p2 <- ggplot(plot.m, aes(colour = rawmaterial, x = age, y = percentage, linetype = rawmaterial)) + 
     geom_line(size = 1) +
@@ -832,4 +838,65 @@ plots_lithics_rawmaterials <- function(lithics){
   # save plot as SVG for finessing...
   ggsave(file = "figures/lithics_proportions_from_1989_for_paper.svg")
   
+  return(list(p1 = p1, p2 = p2, plot2 = plot2))
+  
 }
+
+############################################################
+#' Stratigraphic plot of the lithic raw materials
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' lithics_rawmaterials_stratplotted <- stratiplot_lithics(lithics_rawmaterials_plotted$plot2)
+#' }
+
+stratiplot_lithics <- function(plot2){
+
+
+require(analogue)
+strat_plot <- plot2[,-c(1, 2, 7, 8)]
+# get pit ages for zone labels
+Zones <- plot2[plot2$Spit %in% c(41, 43), ]$age
+# Stratiplot(age ~ . , 
+#            data = strat_plot,
+#            type = c("h","g"), 
+#            sort = "wa", 
+#            zones = Zones, 
+#            zoneNames = c("lower", "pit", "upper"))
+
+require("rioja")
+
+# stratigraphically constrained cluster analysis
+diss <- dist(strat_plot[,-ncol(strat_plot)])
+clust <- chclust(diss, method = "coniss")
+
+# remove NA d[is.na(d)] <- 0
+strat_plot[is.na(strat_plot)] <- 0
+
+# save plot to file
+svg("figures/stratplot.svg", width = 12, , height = 7)
+x <- strat.plot(strat_plot[,-ncol(strat_plot)] * 100,
+                scale.minmax = TRUE, 
+                yvar = as.numeric(strat_plot$age),
+                ylim = range(strat_plot$age, na.rm=TRUE),
+                y.rev = TRUE,    
+                ylabel = "Age (ka)",
+                col.bar = "black",
+                lwd.bar = 5,
+                plot.line = FALSE, # if TRUE, fiddle with col and lwd
+                col.line = "white", # try others that you like
+                lwd.line = 1,    # ditto
+                scale.percent = TRUE,
+                clust = clust
+)
+
+# draws on red lines to indicate pit feature
+addZone(x, Zones, col = 'red') 
+text(10, 10, labels = "Pit feature")
+dev.off()
+
+}
+

@@ -94,7 +94,7 @@ Smith and Jones obtained several more radiocarbon dates that have not been previ
 bayes_cp_result <- bayes_cp_test(chrono_data_slopes_plot$dates_1989)
 ```
 
-Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is  `r round(bayes_cp_result[1,]$"cp$posterior.prob",3)` at `r round(bayes_cp_result[1,]$age2plot,0)` ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is `r round(bayes_cp_result[2,]$"cp$posterior.prob",3)` at `r round(bayes_cp_result[2,]$age2plot,0)` ka).
+Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is  `r round(bayes_cp_result$hi_probs[1,]$"cp$posterior.prob",3)` at `r round(bayes_cp_result$hi_probs[1,]$age2plot,0)` ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is `r round(bayes_cp_result$hi_probs[2,]$"cp$posterior.prob",3)` at `r round(bayes_cp_result$hi_probs[2,]$age2plot,0)` ka).
 
 ```{r sed-rates-15-20-ka}
 # check 15 – 20 ka sedimentation rates
@@ -114,7 +114,7 @@ bayes_slope_posteriors <- bayes_slope_difference(sed_rates_15_to_20_result$sub_O
 ```{r another-mcmc, eval=FALSE}
 # rather time consuming, >30 min
 # bayes_slope_difference_result <- bayes_slope_test(bayes_slope_difference_result$x1_post,
-                                                  bayes_slope_difference_result$x2_post)
+#                                                bayes_slope_difference_result$x2_post)
 ```
 
 ```{r paste-in-results-again}
