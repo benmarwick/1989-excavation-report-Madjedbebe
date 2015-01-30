@@ -8,6 +8,7 @@ output: html_document
 # Supplementary details supporting the analysis of OSL, TL and radiocarbon ages from the 1989 excavations at Madjebebe (Malakanunja II)
 
 ```{r read-in-data, echo=FALSE, messages = FALSE}
+library(mjb1989excavationpaper)
 chrono_data <- get_chrono_data()
 ```
 
@@ -76,7 +77,10 @@ bayes_values <- bayes_slopes_chrono_data(ancova_p_values$upper)
 # from a run so we can use that rather than redo the analysis. To
 # redo the analysis, simply run the code in the previous chunk.
 load("data/slopes_test.rda")
+# This requires the summary.BEST from BEST
 summary(slopes_test)
+best1 <- round(BEST:::summary.BEST(slopes_test)[3], 2)
+best2 <- round(unname(BEST:::summary.BEST(slopes_test)[3, 5:6]),2)
 # print(slopes_test)
 # plot(slopes_test)
 # windows()
@@ -86,7 +90,7 @@ summary(slopes_test)
 
 ```
 
-Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to two meters below the surface (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = `r round(summary(slopes_test)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test)[3, 5:6]),2)`, the interval includes zero, indicating no credible difference). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990).
+Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to two meters below the surface (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = `r best1`, 95% HDI = `r best2`, the interval includes zero, indicating no credible difference). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990).
 
 
 ```{r change-point-analysis}

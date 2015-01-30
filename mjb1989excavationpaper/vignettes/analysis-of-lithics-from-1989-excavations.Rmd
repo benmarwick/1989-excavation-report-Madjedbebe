@@ -8,6 +8,7 @@ output: html_document
 # Supplementary details supporting the analysis of lithics from the 1989 excavations at Madjebebe (Malakanunja II)
 
 ```{r load-data, echo=FALSE}
+library(mjb1989excavationpaper)
 lithics_data <- get_lithics_data()
 chrono_data <- get_chrono_data()
 ```
@@ -26,7 +27,7 @@ lithics_data_cleaned <- clean_lithics_data(lithics_data)
 ```
 
 
-```{r get_interp, results='hide'}
+```{r get_interp, results='hide', include=FALSE}
 # need these to get  bayes_cp_result$cal.date.lo)
 chrono_data_slopes_plot <- plotting_slopes_chrono_data(chrono_data_tidied)
 bayes_cp_result <- bayes_cp_test(chrono_data_slopes_plot$dates_1989)
@@ -43,9 +44,7 @@ Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 
 ```{r raw-materials}
 lithics_rawmaterials_plotted <- plots_lithics_rawmaterials(lithics_data, 
                                                            lithics_data_plotted$spit, 
-                                                           bayes_cp_result$cal.date.pr)
-# plot
-print(lithics_rawmaterials_plotted )                                                     
+                                                           bayes_cp_result$cal.date.pr)                                                     
 ```
 
 
