@@ -66,7 +66,7 @@ lens_differences_tech_plot$p1
 
 ```
 
-Chi square tests indicate that the differences in raw material proportions between all three assemblages are highly significant (p = `r chsq_pval`), although the differences in technological composition are not significant (p = `r lens_differences_tech_plot$tech_chi`), most likely due to small sample size.  Individual tests of the differences between the pit lens and the spits above and the pit lens and spits below are also highly significant for raw materials (p = <0.0005), but not for technological categories
+Chi square tests indicate that the differences in raw material proportions between all three assemblages are highly significant (p = `r chsq_pval`), although the differences in technological composition are not significant (p = `r round(lens_differences_tech_plot$tech_chi$p.value, 3)`), most likely due to small sample size (n = .  
 
 
 
