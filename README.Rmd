@@ -29,7 +29,7 @@ This repository contains the research compendium of our work on the 1989 excavat
 
 #### Read the manuscript 
 
-See the [`vignettes`](https://github.com/benmarwick/1989-excavation-report-Madjebebes/tree/master/vignettes) directory here on GitHub for source code and data for the manuscript.
+See the [`vignettes`](https://github.com/benmarwick/1989-excavation-report-Madjebebe/tree/master/vignettes) directory here on GitHub for source code and data for the manuscript.
 
 #### Install the R package
 
