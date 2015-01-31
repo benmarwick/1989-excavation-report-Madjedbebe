@@ -14,9 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Steele_et_al_VR003_MSA_Pigments 
+# 1989-excavation-report-Madjebebe
 
-<!-- DOI here -->
+<!-- DOI here when ready -->
 
 ### Author
 Ben Marwick (benmarwick@gmail.com)

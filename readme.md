@@ -1,8 +1,8 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-Steele\_et\_al\_VR003\_MSA\_Pigments
-====================================
+1989-excavation-report-Madjebebe
+================================
 
-<!-- DOI here -->
+<!-- DOI here when ready -->
 ### Author
 
 Ben Marwick (<benmarwick@gmail.com>)
