@@ -1,10 +1,10 @@
 Package: mjb1989excavationpaper
-Title: What the Package Does (one line, title case)
+Title: Research Compendium for paper on Malakananja II 1989 excavations
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
+Authors@R: person("Ben", "Marwick", , "benmarwick@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph)
 Depends: R (>= 3.1.2)
-License: What license is it under?
+License: MIT 2015, Ben Marwick
 LazyData: true
 Imports:
  knitr,
