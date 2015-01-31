@@ -129,7 +129,7 @@ plot_chrono_data <- function(dates_1989, oldest_depth, oldest, base_of_dense_dep
   library(ggplot2)
   limits <- aes(ymax = age2plot  + Error/1000, ymin = age2plot  - Error/1000, colour = factor(Method))
   library(scales) # needed for axis number format
-  ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
+p1 <-  ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
     # add loess line that excludes the ABOX dates
     geom_smooth(data =  dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]  , method = "loess", se = FALSE, span = 0.5, colour = "grey", alpha = 0.2, size = 1) +
     # set point size, colour and shape
@@ -185,7 +185,7 @@ plot_chrono_data <- function(dates_1989, oldest_depth, oldest, base_of_dense_dep
 
   # the some minor edits in inkscape to make the data point labels more readable
   # especially spacing out the overlapping point labels
-
+return(p1)
 }
 
 
@@ -979,10 +979,11 @@ p2 <- ggplot(dat_raw1, aes(part, perc, fill = variable)) +
     geom_bar(stat="identity", position=position_dodge()) +
     theme_minimal()
 
-  dat_raw2 <- dcast(dat_raw1, part ~ variable, value.var = 'n')[,-1]
+dat_raw2 <- dcast(dat_raw1, part ~ variable, value.var = 'n')[,-1]
 
-  chisq.test(dat_raw2)
+  # chisq.test(dat_raw2)
   # this seems to agree fine
+raw_chi_fisher <- fisher.test(dat_raw2, simulate.p.value=TRUE)
 
   # retouch to non-retouch
 
@@ -998,14 +999,15 @@ p3 <-   ggplot(ret, aes(part, perc, fill = variable)) +
     geom_bar(stat="identity", position=position_dodge()) +
     theme_minimal()
 
-  dat_ret <- dcast(ret, part ~ variable, value.var = 'n')[,-1]
+raw_table <- dcast(ret, part ~ variable, value.var = 'n')[,-1]
 
-chsq <-   chisq.test(dat_ret)
-  # yes sig diff, but small cell values,
-fshr <-   fisher.test(dat_ret)
-  # still sig
+# raw_chsq <-   chisq.test(raw_table)
 
-return(list(p1 = p1, p2 = p2, p3 = p3, chsq = chsq, fshr = fshr))
+return(list(p1 = p1,
+            p2 = p2,
+            p3 = p3,
+            raw_chi_fisher = raw_chi_fisher,
+            raw_table = raw_table))
 
 }
 
@@ -1107,13 +1109,634 @@ ggplot(dat_tech1, aes(part, percentage, fill = variable)) +
   theme(axis.title.x = element_text(size = n)) +
   theme(axis.title.y = element_text(size = n, angle = 90))
 
-dat_tech2 <- dcast(dat_tech1, part ~ variable, value.var = 'n')[,-1]
+tech_table <- dcast(dat_tech1, part ~ variable, value.var = 'n')[,-1]
 
-tech_chi <- chisq.test(dat_tech2)
+# tech_chi <- chisq.test(tech_table)
+tech_chi_fisher <- fisher.test(tech_table, simulate.p.value=TRUE)
 # not sig, this seems to agree fine
 
-return(list(p1 = p1, tech_chi = tech_chi))
+return(list(p1 = p1,
+            tech_chi_fisher = tech_chi_fisher,
+            tech_table = tech_table,
+            dat_tech1 = dat_tech1))
 
 }
 
 
+
+
+############################################################
+#' Bayesian contingency table analysis - not using this here
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' lens_bayes_tech_plot <- bayes_conting(lens_differences_tech_plot$dat_tech1)
+#' lens_bayes_raw_plot <- bayes_conting(lens_differences_raw_plot$raw_table)
+#' }
+
+bayes_conting <- function(lithics_table){
+
+
+ # Zone = Eye
+ # Tech = Hair
+
+  # Load the data:
+    fileNameRoot="PoissonExponentialJagsSTZ"
+    fileNameRoot = paste( fileNameRoot , "tech" , sep="_" )
+    dataFrame = data.frame( #
+      Freq = lithics_table$n ,
+      Zone  = as.character(lithics_table$part),
+      Tech = as.character(lithics_table$variable) )
+    y = as.numeric(dataFrame$Freq)
+    x1 = as.numeric(dataFrame$Zone)
+    x1names = levels(dataFrame$Zone)
+    x2 = as.numeric(dataFrame$Tech)
+    x2names = levels(dataFrame$Tech)
+    Ncells = length(y)
+    Nx1Lvl = length(unique(x1))
+    Nx2Lvl = length(unique(x2))
+    normalize = function( v ){ return( v / sum(v) ) }
+    x1contrastList = list( ABOVEvLENS = (x1names=="above")-(x1names=="lens"),
+      BELOWvLENS = (x1names=="below")-(x1names=="lens"),
+      LENSvOTHERS = (x1names=="lens")-(x1names !="lens") )
+
+
+# from http://www.indiana.edu/~kruschke/DoingBayesianDataAnalysis/Programs/PoissonExponentialJagsSTZ.R
+fileNameRoot="figures/PoissonExponentialJagsSTZ" # for constructing output filenames
+# source("openGraphSaveGraph.R")
+
+##### start openGraph #####
+openGraph = function( width=7 , height=7 , mag=1.0 , ... ) {
+  if ( .Platform$OS.type != "windows" ) { # Mac OS, Linux
+    X11( width=width*mag , height=height*mag , type="cairo" , ... )
+  } else { # Windows OS
+    windows( width=width*mag , height=height*mag , ... )
+  }
+}
+
+saveGraph = function( file="saveGraphOutput" , type="pdf" , ... ) {
+  if ( .Platform$OS.type != "windows" ) { # Mac OS, Linux
+    if ( any( type == c("png","jpeg","jpg","tiff","bmp")) ) {
+      sptype = type
+      if ( type == "jpg" ) { sptype = "jpeg" }
+      savePlot( file=paste(file,".",type,sep="") , type=sptype , ... )
+    }
+    if ( type == "pdf" ) {
+      dev.copy2pdf(file=paste(file,".",type,sep="") , ... )
+    }
+    if ( type == "eps" ) {
+      dev.copy2eps(file=paste(file,".",type,sep="") , ... )
+    }
+    if ( type == "png" ) {
+      dev.copy2pdf(file=paste(file,".",type,sep="") , ... )
+    }
+  } else { # Windows OS
+    file=paste(file,".",type,sep="") # force explicit extension
+    savePlot( file=file , type=type , ... )
+  }
+}
+##### end openGraph #####
+
+
+require(rjags)         # Kruschke, J. K. (2011). Doing Bayesian Data Analysis:
+# A Tutorial with R and BUGS. Academic Press / Elsevier.
+#------------------------------------------------------------------------------
+# THE MODEL.
+
+modelstring = "
+model {
+for ( i in 1:Ncells ) {
+y[i] ~ dpois( lambda[i] )
+lambda[i] <- exp( a0 + a1[x1[i]] + a2[x2[i]] + a1a2[x1[i],x2[i]] )
+}
+#
+a0 ~ dnorm(10,1.0E-6)
+#
+for ( j1 in 1:Nx1Lvl ) { a1[j1] ~ dnorm( 0.0 , a1tau ) }
+a1tau <- 1 / pow( a1SD , 2 )
+a1SD ~ dgamma(1.01005,0.01005) # mode=1,sd=100
+#
+for ( j2 in 1:Nx2Lvl ) { a2[j2] ~ dnorm( 0.0 , a2tau ) }
+a2tau <- 1 / pow( a2SD , 2 )
+a2SD ~ dgamma(1.01005,0.01005) # mode=1,sd=100
+#
+for ( j1 in 1:Nx1Lvl ) { for ( j2 in 1:Nx2Lvl ) {
+a1a2[j1,j2] ~ dnorm( 0.0 , a1a2tau )
+} }
+a1a2tau <- 1 / pow( a1a2SD , 2 )
+a1a2SD ~ dgamma(1.01005,0.01005) # mode=1,sd=100
+# Convert a0,a1[],a2[],a1a2[,] to sum-to-zero b0,b1[],b2[],b1b2[,] :
+for ( j1 in 1:Nx1Lvl ) { for ( j2 in 1:Nx2Lvl ) {
+m[j1,j2] <- a0 + a1[j1] + a2[j2] + a1a2[j1,j2]
+} }
+b0 <- mean( m[1:Nx1Lvl,1:Nx2Lvl] )
+for ( j1 in 1:Nx1Lvl ) { b1[j1] <- mean( m[j1,1:Nx2Lvl] ) - b0 }
+for ( j2 in 1:Nx2Lvl ) { b2[j2] <- mean( m[1:Nx1Lvl,j2] ) - b0 }
+for ( j1 in 1:Nx1Lvl ) { for ( j2 in 1:Nx2Lvl ) {
+b1b2[j1,j2] <- m[j1,j2] - ( b0 + b1[j1] + b2[j2] )
+} }
+}
+" # close quote for modelstring
+# Write model to a file, and send to JAGS:
+writeLines(modelstring,con="model.txt")
+
+#------------------------------------------------------------------------------
+
+dataList = list(
+  y = y ,
+  x1 = x1 ,
+  x2 = x2 ,
+  Ncells = Ncells ,
+  Nx1Lvl = Nx1Lvl ,
+  Nx2Lvl = Nx2Lvl
+)
+
+#------------------------------------------------------------------------------
+# INTIALIZE THE CHAINS.
+
+theData = data.frame( y=log(y) , x1=factor(x1,labels=x1names) ,
+                      x2=factor(x2,labels=x2names) )
+a0 = mean( theData$y )
+a1 = aggregate( theData$y , list( theData$x1 ) , mean )[,2] - a0
+a2 = aggregate( theData$y , list( theData$x2 ) , mean )[,2] - a0
+linpred = as.vector( outer( a1 , a2 , "+" ) + a0 )
+a1a2 = aggregate( theData$y, list(theData$x1,theData$x2), mean)[,3] - linpred
+initsList = list( a0 = a0 , a1 = a1 , a2 = a2 ,
+                  a1a2 = matrix( a1a2 , nrow=Nx1Lvl , ncol=Nx2Lvl ) ,
+                  a1SD = max(sd(a1),0.1) , a2SD = max(sd(a2),0.1) , a1a2SD = max(sd(a1a2),0.1) )
+
+#------------------------------------------------------------------------------
+# RUN THE CHAINS
+
+parameters = c( "a0" ,  "a1" ,  "a2" ,  "a1a2" ,
+                "b0" ,  "b1" ,  "b2" ,  "b1b2" ,
+                "a1SD" , "a2SD" , "a1a2SD" )
+adaptSteps = 1000
+burnInSteps = 2000
+nChains = 5
+numSavedSteps=50000
+thinSteps=1
+nIter = ceiling( ( numSavedSteps * thinSteps ) / nChains )
+# Create, initialize, and adapt the model:
+jagsModel = jags.model( "model.txt" , data=dataList , inits=initsList ,
+                        n.chains=nChains , n.adapt=adaptSteps )
+# Burn-in:
+cat( "Burning in the MCMC chain...\n" )
+update( jagsModel , n.iter=burnInSteps )
+# The saved MCMC chain:
+cat( "Sampling final MCMC chain...\n" )
+codaSamples = coda.samples( jagsModel , variable.names=parameters ,
+                            n.iter=nIter , thin=thinSteps )
+# resulting codaSamples object has these indices:
+#   codaSamples[[ chainIdx ]][ stepIdx , paramIdx ]
+
+#------------------------------------------------------------------------------
+# EXAMINE THE RESULTS
+
+checkConvergence = F
+if ( checkConvergence ) {
+  show( summary( codaSamples ) )
+  openGraph()
+  plot( codaSamples , ask=F )
+  openGraph()
+  autocorr.plot( codaSamples , ask=F )
+}
+
+# Convert coda-object codaSamples to matrix object for easier handling.
+# But note that this concatenates the different chains into one long chain.
+# Result is mcmcChain[ stepIdx , paramIdx ]
+mcmcChain = as.matrix( codaSamples )
+
+
+# Extract the SDs:
+a1SDSample = mcmcChain[,"a1SD"]
+a2SDSample = mcmcChain[,"a2SD"]
+a1a2SDSample = mcmcChain[,"a1a2SD"]
+
+# Extract b values:
+b0Sample = mcmcChain[, "b0" ]
+chainLength = length(b0Sample)
+b1Sample = array( 0 , dim=c( dataList$Nx1Lvl , chainLength ) )
+for ( x1idx in 1:dataList$Nx1Lvl ) {
+  b1Sample[x1idx,] = mcmcChain[, paste("b1[",x1idx,"]",sep="") ]
+}
+b2Sample = array( 0 , dim=c( dataList$Nx2Lvl , chainLength ) )
+for ( x2idx in 1:dataList$Nx2Lvl ) {
+  b2Sample[x2idx,] = mcmcChain[, paste("b2[",x2idx,"]",sep="") ]
+}
+b1b2Sample = array(0, dim=c( dataList$Nx1Lvl , dataList$Nx2Lvl , chainLength ) )
+for ( x1idx in 1:dataList$Nx1Lvl ) {
+  for ( x2idx in 1:dataList$Nx2Lvl ) {
+    b1b2Sample[x1idx,x2idx,] = mcmcChain[, paste( "b1b2[",x1idx,",",x2idx,"]",
+                                                  sep="" ) ]
+  }
+}
+
+# source("plotPost.R")
+
+
+
+openGraph(10,3)
+layout( matrix(1:3,nrow=1) )
+par( mar=c(3,1,2.5,0) , mgp=c(2,0.7,0) )
+histInfo = plotPost( a1SDSample , xlab="a1SD" , main="a1 SD" , showMode=T )
+histInfo = plotPost( a2SDSample , xlab="a2SD" , main="a2 SD" , showMode=T )
+histInfo = plotPost( a1a2SDSample , xlab="a1a2SD" , main="Interaction SD" ,
+                     showMode=T )
+saveGraph(file=paste( fileNameRoot,"SD", sep=""), type="png")
+
+# Plot b values:
+openGraph((dataList$Nx1Lvl+1)*2.75,(dataList$Nx2Lvl+1)*2.25)
+layoutMat = matrix( 0 , nrow=(dataList$Nx2Lvl+1) , ncol=(dataList$Nx1Lvl+1) )
+layoutMat[1,1] = 1
+layoutMat[1,2:(dataList$Nx1Lvl+1)] = 1:dataList$Nx1Lvl + 1
+layoutMat[2:(dataList$Nx2Lvl+1),1] = 1:dataList$Nx2Lvl + (dataList$Nx1Lvl + 1)
+layoutMat[2:(dataList$Nx2Lvl+1),2:(dataList$Nx1Lvl+1)] = matrix(
+  1:(dataList$Nx1Lvl*dataList$Nx2Lvl) + (dataList$Nx2Lvl+dataList$Nx1Lvl+1) ,
+  ncol=dataList$Nx1Lvl , byrow=T )
+layout( layoutMat )
+par( mar=c(4,0.5,2.5,0.5) , mgp=c(2,0.7,0) )
+histinfo = plotPost( b0Sample , xlab=expression(beta * 0) , main="Baseline" )
+for ( x1idx in 1:dataList$Nx1Lvl ) {
+  histinfo = plotPost( b1Sample[x1idx,] , xlab=bquote(beta*1[.(x1idx)]) ,
+                       main=paste("x1:",x1names[x1idx]) )
+}
+for ( x2idx in 1:dataList$Nx2Lvl ) {
+  histinfo = plotPost( b2Sample[x2idx,] , xlab=bquote(beta*2[.(x2idx)]) ,
+                       main=paste("x2:",x2names[x2idx]) )
+}
+for ( x2idx in 1:dataList$Nx2Lvl ) {
+  for ( x1idx in 1:dataList$Nx1Lvl ) {
+    hdiLim = HDIofMCMC(b1b2Sample[x1idx,x2idx,])
+    if ( hdiLim[1]>0 | hdiLim[2]<0 ) { compVal=0 } else { compVal=NULL }
+    histinfo = plotPost( b1b2Sample[x1idx,x2idx,] , compVal=compVal ,
+                         xlab=bquote(beta*12[list(x1==.(x1idx),x2==.(x2idx))]) ,
+                         main=paste("x1:",x1names[x1idx],", x2:",x2names[x2idx])  )
+  }
+}
+saveGraph(file=paste(fileNameRoot,"b",sep=""),type="png")
+
+# Display contrast analyses
+nContrasts = length( x1contrastList )
+if ( nContrasts > 0 ) {
+  nPlotPerRow = 5
+  nPlotRow = ceiling(nContrasts/nPlotPerRow)
+  nPlotCol = ceiling(nContrasts/nPlotRow)
+  openGraph(3.75*nPlotCol,2.5*nPlotRow)
+  layout( matrix(1:(nPlotRow*nPlotCol),nrow=nPlotRow,ncol=nPlotCol,byrow=T) )
+  par( mar=c(4,0.5,2.5,0.5) , mgp=c(2,0.7,0) )
+  for ( cIdx in 1:nContrasts ) {
+    contrast = matrix( x1contrastList[[cIdx]],nrow=1) # make it a row matrix
+    incIdx = contrast!=0
+    histInfo = plotPost( contrast %*% b1Sample , compVal=0 ,
+                         xlab=paste( round(contrast[incIdx],2) , x1names[incIdx] ,
+                                     c(rep("+",sum(incIdx)-1),"") , collapse=" " ) ,
+                         cex.lab = 1.0 ,
+                         main=paste( "X1 Contrast:", names(x1contrastList)[cIdx] ) )
+  }
+  saveGraph(file=paste(fileNameRoot,"x1Contrasts",sep=""),type="png")
+
+}
+
+
+# Compute credible cell probability at each step in the MCMC chain
+lambda12Sample = 0 * b1b2Sample
+for ( chainIdx in 1:chainLength ) {
+  lambda12Sample[,,chainIdx] = exp(
+    b0Sample[chainIdx]
+    + outer( b1Sample[,chainIdx] , b2Sample[,chainIdx] , "+" )
+    + b1b2Sample[,,chainIdx] )
+}
+cellp = 0 * lambda12Sample
+for ( chainIdx in 1:chainLength ) {
+  cellp[,,chainIdx] = ( lambda12Sample[,,chainIdx]
+                        / sum( lambda12Sample[,,chainIdx] ) )
+}
+# Display credible cell probabilities
+openGraph((dataList$Nx1Lvl)*2.75,(dataList$Nx2Lvl)*2.25)
+layoutMat = matrix( 1:(dataList$Nx2Lvl*dataList$Nx1Lvl) ,
+                    nrow=(dataList$Nx2Lvl) , ncol=(dataList$Nx1Lvl) , byrow=T )
+layout( layoutMat )
+par( mar=c(4,1.5,2.5,0.5) , mgp=c(2,0.7,0) )
+maxp = max( cellp )
+for ( x2idx in 1:dataList$Nx2Lvl ) {
+  for ( x1idx in 1:dataList$Nx1Lvl ) {
+    histinfo = plotPost( cellp[x1idx,x2idx,] ,
+                         breaks=seq(0,maxp,length=51) , xlim=c(0,maxp) ,
+                         xlab=bquote(probability[list(x1==.(x1idx),x2==.(x2idx))]) ,
+                         main=paste("x1:",x1names[x1idx],", x2:",x2names[x2idx]) ,
+                         HDItextPlace=0.95 )
+  }
+}
+saveGraph(file=paste(fileNameRoot,"CellP",sep=""),type="png")
+
+
+#==============================================================================
+# Conduct NHST Pearson chi-square test of independence.
+
+# Convert dataFrame to frequency table:
+obsFreq = matrix( 0 , nrow=Nx1Lvl , ncol=Nx2Lvl )
+for ( x1idx in 1:Nx1Lvl ) {
+  for ( x2idx in 1:Nx2Lvl ) {
+    obsFreq[x1idx,x2idx] = y[ dataFrame[,2]==x1names[x1idx]
+                              & dataFrame[,3]==x2names[x2idx] ]
+  }
+}
+obsFreq = t(obsFreq) # merely to match orientation of histogram display
+chisqtest = chisq.test( obsFreq )
+# print( "obs :" )
+# print( chisqtest$observed )
+# print( "( obs - exp )^2 / exp :" )
+# print( ( chisqtest$observed - chisqtest$expected )^2 / chisqtest$expected )
+
+#==============================================================================
+
+
+
+return(chisqtest)
+}
+
+############################################################
+#' HDIofMCMC
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' HDIofMCMC()
+#' }
+
+#### begin HDIofMCMC.R ####
+HDIofMCMC = function( sampleVec , credMass=0.95 ) {
+  # Computes highest density interval from a sample of representative values,
+  #   estimated as shortest credible interval.
+  # Arguments:
+  #   sampleVec
+  #     is a vector of representative values from a probability distribution.
+  #   credMass
+  #     is a scalar between 0 and 1, indicating the mass within the credible
+  #     interval that is to be estimated.
+  # Value:
+  #   HDIlim is a vector containing the limits of the HDI
+  sortedPts = sort( sampleVec )
+  ciIdxInc = floor( credMass * length( sortedPts ) )
+  nCIs = length( sortedPts ) - ciIdxInc
+  ciWidth = rep( 0 , nCIs )
+  for ( i in 1:nCIs ) {
+    ciWidth[ i ] = sortedPts[ i + ciIdxInc ] - sortedPts[ i ]
+  }
+  HDImin = sortedPts[ which.min( ciWidth ) ]
+  HDImax = sortedPts[ which.min( ciWidth ) + ciIdxInc ]
+  HDIlim = c( HDImin , HDImax )
+  return( HDIlim )
+}
+#### end HDIofMCMC.R ####
+
+############################################################
+#' plotPost
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' plotPost()
+#' }
+#### start plotPost.R #####
+plotPost <-  function( paramSampleVec , credMass=0.95 , compVal=NULL ,
+                     HDItextPlace=0.7 , ROPE=NULL , yaxt=NULL , ylab=NULL ,
+                     xlab=NULL , cex.lab=NULL , cex=NULL , xlim=NULL , main=NULL ,
+                     col=NULL , border=NULL , showMode=F , showCurve=F , breaks=NULL ,
+                     ... ) {
+  # Override defaults of hist function, if not specified by user:
+  # (additional arguments "..." are passed to the hist function)
+  if ( is.null(xlab) ) xlab="Parameter"
+  if ( is.null(cex.lab) ) cex.lab=1.5
+  if ( is.null(cex) ) cex=1.4
+  if ( is.null(xlim) ) xlim=range( c( compVal , paramSampleVec ) )
+  if ( is.null(main) ) main=""
+  if ( is.null(yaxt) ) yaxt="n"
+  if ( is.null(ylab) ) ylab=""
+  if ( is.null(col) ) col="skyblue"
+  if ( is.null(border) ) border="white"
+
+  postSummary = matrix( NA , nrow=1 , ncol=11 ,
+                        dimnames=list( c( xlab ) ,
+                                       c("mean","median","mode",
+                                         "hdiMass","hdiLow","hdiHigh",
+                                         "compVal","pcGTcompVal",
+                                         "ROPElow","ROPEhigh","pcInROPE")))
+  postSummary[,"mean"] = mean(paramSampleVec)
+  postSummary[,"median"] = median(paramSampleVec)
+  mcmcDensity = density(paramSampleVec)
+  postSummary[,"mode"] = mcmcDensity$x[which.max(mcmcDensity$y)]
+
+  # source("HDIofMCMC.R")
+
+
+
+
+  HDIofMCMC = function( sampleVec , credMass=0.95 ) {
+    # Computes highest density interval from a sample of representative values,
+    #   estimated as shortest credible interval.
+    # Arguments:
+    #   sampleVec
+    #     is a vector of representative values from a probability distribution.
+    #   credMass
+    #     is a scalar between 0 and 1, indicating the mass within the credible
+    #     interval that is to be estimated.
+    # Value:
+    #   HDIlim is a vector containing the limits of the HDI
+    sortedPts = sort( sampleVec )
+    ciIdxInc = floor( credMass * length( sortedPts ) )
+    nCIs = length( sortedPts ) - ciIdxInc
+    ciWidth = rep( 0 , nCIs )
+    for ( i in 1:nCIs ) {
+      ciWidth[ i ] = sortedPts[ i + ciIdxInc ] - sortedPts[ i ]
+    }
+    HDImin = sortedPts[ which.min( ciWidth ) ]
+    HDImax = sortedPts[ which.min( ciWidth ) + ciIdxInc ]
+    HDIlim = c( HDImin , HDImax )
+    return( HDIlim )
+  }
+
+  HDI = HDIofMCMC( paramSampleVec , credMass )
+  postSummary[,"hdiMass"]=credMass
+  postSummary[,"hdiLow"]=HDI[1]
+  postSummary[,"hdiHigh"]=HDI[2]
+
+  # Plot histogram.
+  if ( is.null(breaks) ) {
+    breaks = c( seq( from=min(paramSampleVec) , to=max(paramSampleVec) ,
+                     by=(HDI[2]-HDI[1])/18 ) , max(paramSampleVec) )
+  }
+  if ( !showCurve ) {
+    par(xpd=NA)
+    histinfo = hist( paramSampleVec , xlab=xlab , yaxt=yaxt , ylab=ylab ,
+                     freq=F , border=border , col=col ,
+                     xlim=xlim , main=main , cex=cex , cex.lab=cex.lab ,
+                     breaks=breaks , ... )
+  }
+  if ( showCurve ) {
+    par(xpd=NA)
+    histinfo = hist( paramSampleVec , plot=F )
+    densCurve = density( paramSampleVec , adjust=2 )
+    plot( densCurve$x , densCurve$y , type="l" , lwd=5 , col=col , bty="n" ,
+          xlim=xlim , xlab=xlab , yaxt=yaxt , ylab=ylab ,
+          main=main , cex=cex , cex.lab=cex.lab , ... )
+  }
+  cenTendHt = 0.9*max(histinfo$density)
+  cvHt = 0.7*max(histinfo$density)
+  ROPEtextHt = 0.55*max(histinfo$density)
+  # Display mean or mode:
+  if ( showMode==F ) {
+    meanParam = mean( paramSampleVec )
+    text( meanParam , cenTendHt ,
+          bquote(mean==.(signif(meanParam,3))) , adj=c(.5,0) , cex=cex )
+  } else {
+    dres = density( paramSampleVec )
+    modeParam = dres$x[which.max(dres$y)]
+    text( modeParam , cenTendHt ,
+          bquote(mode==.(signif(modeParam,3))) , adj=c(.5,0) , cex=cex )
+  }
+  # Display the comparison value.
+  if ( !is.null( compVal ) ) {
+    cvCol = "darkgreen"
+    pcgtCompVal = round( 100 * sum( paramSampleVec > compVal )
+                         / length( paramSampleVec )  , 1 )
+    pcltCompVal = 100 - pcgtCompVal
+    lines( c(compVal,compVal) , c(0.96*cvHt,0) ,
+           lty="dotted" , lwd=1 , col=cvCol )
+    text( compVal , cvHt ,
+          bquote( .(pcltCompVal)*"% < " *
+                    .(signif(compVal,3)) * " < "*.(pcgtCompVal)*"%" ) ,
+          adj=c(pcltCompVal/100,0) , cex=0.8*cex , col=cvCol )
+    postSummary[,"compVal"] = compVal
+    postSummary[,"pcGTcompVal"] = ( sum( paramSampleVec > compVal )
+                                    / length( paramSampleVec ) )
+  }
+  # Display the ROPE.
+  if ( !is.null( ROPE ) ) {
+    ropeCol = "darkred"
+    pcInROPE = ( sum( paramSampleVec > ROPE[1] & paramSampleVec < ROPE[2] )
+                 / length( paramSampleVec ) )
+    lines( c(ROPE[1],ROPE[1]) , c(0.96*ROPEtextHt,0) , lty="dotted" , lwd=2 ,
+           col=ropeCol )
+    lines( c(ROPE[2],ROPE[2]) , c(0.96*ROPEtextHt,0) , lty="dotted" , lwd=2 ,
+           col=ropeCol)
+    text( mean(ROPE) , ROPEtextHt ,
+          bquote( .(round(100*pcInROPE))*"% in ROPE" ) ,
+          adj=c(.5,0) , cex=1 , col=ropeCol )
+
+    postSummary[,"ROPElow"]=ROPE[1]
+    postSummary[,"ROPEhigh"]=ROPE[2]
+    postSummary[,"pcInROPE"]=pcInROPE
+  }
+  # Display the HDI.
+  lines( HDI , c(0,0) , lwd=4 )
+  text( mean(HDI) , 0 , bquote(.(100*credMass) * "% HDI" ) ,
+        adj=c(.5,-1.7) , cex=cex )
+  text( HDI[1] , 0 , bquote(.(signif(HDI[1],3))) ,
+        adj=c(HDItextPlace,-0.5) , cex=cex )
+  text( HDI[2] , 0 , bquote(.(signif(HDI[2],3))) ,
+        adj=c(1.0-HDItextPlace,-0.5) , cex=cex )
+  par(xpd=F)
+  #
+  return( postSummary )
+}
+#### end plotPost.R #####
+
+############################################################
+#' Plot shell data
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' shell_data_plotted <- plot_shell_data()
+#' }
+
+plot_shell_data <- function(){
+
+  shells <- read.csv("data/Shell_table_from_paper_on_1989_dig.csv", header=TRUE, stringsAsFactors = FALSE)
+
+  # edit colnames
+  shells$`P. coaxans` <- shells$Geloina
+  shells$`T. telescopium` <- shells$Telescopium
+  shells$`Cerithidea sp.` <- shells$Cerithidea
+  shells$`Nerita sp.` <- shells$Nerita
+
+  # filter rows
+  shells <- shells[shells$Spit %in% c("DE30/4", "DE30/5", "DE30/6", "DE30/7", "DE30/8"),]
+
+  # add in missing row (read from excel chart embedded in draft)
+  shells <- rbind(shells, c("DE30/7", 589.2,  113.5,
+                            0, 0, 0,
+                            62, 0, 0,
+                            0, 292, 113.5,
+                            589.2, 62))
+
+  # subset just certain species
+  shells <- shells[, c("Spit", "P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")]
+
+  # sort by spit
+  shells <- shells[with(shells, order(gsub("[[:alpha:]]", "", shells$Spit)  )), ]
+
+  # reshape
+  library(reshape2)
+  shells_m <- melt(shells, id = 'Spit')
+  shells_m$value  <- as.numeric(shells_m$value)
+
+  # plot mass
+  library(ggplot2)
+
+
+  # compute percent of spit total
+  shells[, c("P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")] <- sapply(shells[, c("P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")], as.numeric)
+
+  spit_total <- unname(rowSums(shells[, c("P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")], na.rm = TRUE))
+
+  shells_perc <- shells[, c("P. coaxans", "T. telescopium", "Cerithidea sp.", "Nerita sp.")]
+
+  # compute percentages
+  df <- shells_perc
+  for(i in 1:nrow(shells_perc)){
+    df[i,] <- shells_perc[i,] / spit_total[i] * 100
+  }
+
+  df$Spit <- shells$Spit
+  library(reshape2)
+  df_m <- melt(df, id = 'Spit')
+  df_m$value  <- as.numeric(df_m$value)
+
+
+
+# get perc mass and mass in one table, then plot
+perc <- df_m
+mass <-  shells_m
+
+perc_and_mass <- merge(perc, mass, by = c("Spit", "variable"))
+names(perc_and_mass) <- c("Spit", "Taxon", "Percentage", "Mass")
+
+perc_and_mass_m <- melt(perc_and_mass)
+
+
+g <- ggplot(perc_and_mass_m, aes(Taxon, value)) +
+  geom_bar( position = "dodge", stat="identity") +
+  theme_bw(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  xlab("") +
+  ylab("") +
+  facet_grid(variable ~ Spit, scales = "free_y")
+
+# save plot as PNG
+ggsave(file = "figures/shell_from_1989_for_paper.png", g)
+
+return(g)
+
+}

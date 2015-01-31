@@ -1,18 +1,31 @@
 ---
-title: ""
-author: Ben Marwick
-date: Thursday, June 26, 2014
-output: html_document
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 
-# Supplementary details supporting the analysis of OSL, TL and radiocarbon ages from the 1989 excavations at Madjebebe (Malakanunja II)
+## Supplementary details supporting the analysis of OSL and C14 dates, lithics and shellfish from the 1989 excavations at Madjebebe (Malakanunja II)
 
-```{r read-in-data, echo=FALSE, messages = FALSE}
+#### Ben Marwick, benmarwick@gmail.com
+
+This document contains the source code used to generate the plots and statistics presented in the manuscript. It is provided to give the reader additional insight into the data analysis workflow and allow anyone to reproduce our analysis and further explore the analyses and data for themselves. 
+
+```{r, echo = FALSE}
+library(knitr)
+opts_chunk$set(fig.width = 7, messages = FALSE, warning = FALSE)
+```
+
+### OSL and C14 dates
+
+```{r read-in-dates-data}
 library(mjb1989excavationpaper)
 chrono_data <- get_chrono_data()
 ```
 
-```{r clean-up}
+
+```{r clean-up-dates}
 chrono_data_tidied <- tidy_chrono_data(chrono_data)
 ```
 
@@ -21,12 +34,13 @@ chrono_data_tidied <- tidy_chrono_data(chrono_data)
 chrono_data_interpolated <- interpolate_chrono_data(chrono_data_tidied)
 ```
 
-```{r plot-dates}
+```{r plot-dates, results='asis'}
 chrono_data_plotted <- plot_chrono_data(chrono_data_tidied, 
                         oldest_depth = chrono_data_interpolated$oldest_depth,
                         oldest = chrono_data_interpolated$oldest,
                         base_of_dense_depth = chrono_data_interpolated$base_of_dense_depth,
                         dense = chrono_data_interpolated$dense)
+cat("<p><img src='figures/MKII_dates_from_1989_for_paper.svg'</p>")
 ```
 
 Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretations—stressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation — we confirm here that the lowest artefacts occur in Spit 49, 2.76 – 2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
@@ -81,13 +95,6 @@ load("data/slopes_test.rda")
 summary(slopes_test)
 best1 <- round(BEST:::summary.BEST(slopes_test)[3], 2)
 best2 <- round(unname(BEST:::summary.BEST(slopes_test)[3, 5:6]),2)
-# print(slopes_test)
-# plot(slopes_test)
-# windows()
-# plotAll(slopes_test, credMass=0.8, ROPEm=c(-0.1,0.1), 
-#         ROPEeff=c(-0.2,0.2), compValm=0.5) 
-# pairs(slopes_test)
-
 ```
 
 Smith and Jones obtained several more radiocarbon dates that have not been previously published (Table 1), increasing the number of available radiocarbon ages for the site to 13. With the exception of one anomalous age from the base of the sequence already discussed above (ANUA-9915), the additional 14C ages provide a picture of consistent depth-age relationships between radiocarbon and luminescence techniques down to two meters below the surface (the depth of the lowest in-sequence radiocarbon date). A test of the difference between the correlation coefficients for the linear regression slopes for 14C and luminescence ages indicates no significant difference between slopes, indicating that both provide effectively identical age-depth relationships for the uppermost two meters of deposit (Bayesian estimation of difference in means = `r best1`, 95% HDI = `r best2`, the interval includes zero, indicating no credible difference). Concerns over the degree of fit between 14C and luminescence chronologies for the upper half of the deposit can no longer be sustained (cf. Bowdler 1990; Hiscock 1990).
@@ -138,5 +145,72 @@ summary(slopes_test_sub)
 
 Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = `r round(summary(slopes_test_sub)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test_sub)[3, 5:6]),2)`, the interval includes zero, indicating no credible difference). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
 
- 
+
+### Lithics
+
+```{r load-lithic-data, echo=FALSE}
+library(mjb1989excavationpaper)
+lithics_data <- get_lithics_data()
+```
+
+```{r clean-data}
+# Now onto the lithic data...
+lithics_data_cleaned <- clean_lithics_data(lithics_data)
+```
+
+
+```{r get_interp, results='hide', include=FALSE}
+# need these to get  bayes_cp_result$cal.date.lo)
+chrono_data_slopes_plot <- plotting_slopes_chrono_data(chrono_data_tidied)
+bayes_cp_result <- bayes_cp_test(chrono_data_slopes_plot$dates_1989)
+```
+
+```{rplot-data}
+lithics_data_plotted <- plots_lithics_data(lithics_data,  bayes_cp_result$cal.date.lo)
+lithics_data_plotted$p1
+# figures/lithics_over_time_from_1989_for_paper.svg
+```
+
+Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 6, Table 2). These show distinct pulses of accumulation, centred around 5, 7, 12.5, 18.4, 36, and 45 – 52 ka (Figure 6). Between Spits 37 – 39 (2.2 – 2.4 m bs) there are 1900 flaked stone artefacts from the 7 mm sieve (including 41 of exotic chert), numerous pieces of high-grade haematite (totalling 4.92 kg, including seven ground pieces), 143 g of red or yellow ochre, pieces of dolerite (presumed to be fragments of edge-ground axes) and fragments of grindstones; a further 568 flaked stone artefacts and 344 pieces of haematite were recovered from the pit fill at this level. All of these are associated with, or are slightly beneath, a TL age of 45 ± 9 ka. Beneath this, in levels dating 52 ± 11 to 61 ± 13 ka there were an additional 82 flaked stone artefacts and 52 pieces of haematite recovered from the 7 mm sieve. This is a comparatively large assemblage from a trench measuring only 1 x 1.5 m. It is unlikely the quartzite stone artefacts derive from downward displacement of artefacts from the predominately quartz assemblage that overlies it.  
+
+```{r raw-materials}
+lithics_rawmaterials_plotted <- plots_lithics_rawmaterials(lithics_data, 
+                                                           lithics_data_plotted$spit, 
+                                                           bayes_cp_result$cal.date.pr)                                                     
+```
+
+
+```{r strat-plot}
+lithics_rawmaterials_stratplotted <- stratiplot_lithics(lithics_rawmaterials_plotted$plot2)
+# figures/stratplot.svg
+```
+
+
+```{r lens-raw-materials}
+lens_differences_raw_plot <- lens_differences_raw()
+lens_differences_raw_plot$p1
+raw_fish_pval <- formatC(round(lens_differences_raw_plot$raw_chi_fisher$p.value, 4), big.mark=",",format="f", drop0trailing = TRUE)
+```
+
+```{r lens-tech-difference}
+lens_differences_tech_plot <- lens_differences_tech()
+lens_differences_tech_plot$p1
+tech_fish_pval <- round(lens_differences_tech_plot$tech_chi_fisher$p.value, 3)
+```
+
+Chi square tests indicate that the differences in raw material proportions between all three assemblages are highly significant (p = `r raw_fish_pval`), although the differences in technological composition are not significant (p = `r tech_fish_pval`), most likely due to small sample size (n = 10 for types in the assemblage below the lens).  
+
+
+## Shellfish
+
+```{r shell-plot}
+shell_data_plotted <- plot_shell_data()
+shell_data_plotted
+```
+
+### R Session Information
+
+```{r}
+sessionInfo()
+```
 
