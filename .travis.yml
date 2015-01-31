@@ -9,6 +9,8 @@ before_install:
 
 install:
   - ./travis-tool.sh install_deps
+     ## For GitHub packages
+  - ./travis-tool.sh install_github mikemeredith/BEST
 
 script: ./travis-tool.sh run_tests
 

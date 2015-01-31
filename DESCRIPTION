@@ -2,7 +2,7 @@ Package: mjb1989excavationpaper
 Title: Research Compendium for paper on Malakananja II 1989 excavations
 Version: 0.0.0.9000
 Authors@R: person("Ben", "Marwick", , "benmarwick@gmail.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph)
+Description: Contains functions to generate the plots and statistical output found in the paper
 Depends: R (>= 3.1.2)
 License: MIT, 2015, Ben Marwick
 LazyData: true
