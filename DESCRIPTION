@@ -4,13 +4,14 @@ Version: 0.0.0.9000
 Authors@R: person("Ben", "Marwick", , "benmarwick@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph)
 Depends: R (>= 3.1.2)
-License: MIT 2015, Ben Marwick
+License: MIT, 2015, Ben Marwick
 LazyData: true
-Imports: 
+Imports:
  knitr,
  ggplot2,
  reshape2,
  scales,
+ rjags
  MCMCpack,
  BEST,
  bcp,
