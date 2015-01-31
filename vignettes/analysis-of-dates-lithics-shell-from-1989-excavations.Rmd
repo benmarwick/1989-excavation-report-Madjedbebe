@@ -92,6 +92,7 @@ bayes_values <- bayes_slopes_chrono_data(ancova_p_values$upper)
 # redo the analysis, simply run the code in the previous chunk.
 load("data/slopes_test.rda")
 # This requires the summary.BEST from BEST
+library("BEST")
 summary(slopes_test)
 best1 <- round(BEST:::summary.BEST(slopes_test)[3], 2)
 best2 <- round(unname(BEST:::summary.BEST(slopes_test)[3, 5:6]),2)
