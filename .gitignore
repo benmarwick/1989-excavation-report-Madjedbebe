@@ -1,6 +1,4 @@
 .Rproj.user
 .Rhistory
 .RData
-*.svg
-*.Rproj
-*.html
+inst/doc
