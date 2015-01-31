@@ -85,3 +85,44 @@ Data: CC0 http://creativecommons.org/publicdomain/zero/1.0/
 * The organisation of this compendium is based on the work of [Carl Boettiger](http://www.carlboettiger.info/) 
 
 ### R Session Information
+
+````{r}
+sessionInfo()
+## R version 3.1.2 (2014-10-31)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## 
+## locale:
+## [1] LC_COLLATE=C                          
+## [2] LC_CTYPE=English_United States.1252   
+## [3] LC_MONETARY=English_United States.1252
+## [4] LC_NUMERIC=C                          
+## [5] LC_TIME=English_United States.1252    
+## 
+## attached base packages:
+## [1] grid      stats     graphics  grDevices utils     datasets  methods  
+## [8] base     
+## 
+## other attached packages:
+##  [1] dplyr_0.4.1                       rioja_0.9-3                      
+##  [3] analogue_0.16-0                   vegan_2.2-1                      
+##  [5] permute_0.8-3                     RColorBrewer_1.1-2               
+##  [7] reshape2_1.4.1.9000               bcp_3.0.1                        
+##  [9] Rcpp_0.11.4                       iterators_1.0.7                  
+## [11] foreach_1.4.2                     BEST_0.2.2                       
+## [13] rjags_3-14                        MCMCpack_1.3-3                   
+## [15] MASS_7.3-35                       coda_0.16-1                      
+## [17] lattice_0.20-29                   scales_0.2.4                     
+## [19] ggplot2_1.0.0                     mjb1989excavationpaper_0.0.0.9000
+## [21] knitr_1.9                        
+## 
+## loaded via a namespace (and not attached):
+##  [1] DBI_0.3.1        Matrix_1.1-4     assertthat_0.1   brglm_0.5-9     
+##  [5] cluster_1.15.3   codetools_0.2-9  colorspace_1.2-4 compiler_3.1.2  
+##  [9] digest_0.6.8     evaluate_0.5.5   formatR_1.0      gdata_2.13.3    
+## [13] gtable_0.1.2     gtools_3.4.1     htmltools_0.2.6  labeling_0.3    
+## [17] lazyeval_0.1.10  magrittr_1.5     mgcv_1.8-3       munsell_0.4.2   
+## [21] nlme_3.1-118     parallel_3.1.2   plyr_1.8.1       princurve_1.1-12
+## [25] proto_0.3-10     rmarkdown_0.5.1  stringr_0.6.2    tools_3.1.2     
+## [29] yaml_2.1.13
+
+```
