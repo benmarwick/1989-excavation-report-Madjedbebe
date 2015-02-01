@@ -130,8 +130,8 @@ plot_chrono_data <- function(dates_1989, oldest_depth, oldest, base_of_dense_dep
   limits <- aes(ymax = age2plot  + Error/1000, ymin = age2plot  - Error/1000, colour = factor(Method))
   library(scales) # needed for axis number format
 p1 <-  ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
-    # add loess line that excludes the ABOX dates
-    geom_smooth(data =  dates_1989[dates_1989$Method %in% c("C14", "TL", "OSL"),]  , method = "loess", se = FALSE, span = 0.5, colour = "grey", alpha = 0.2, size = 1) +
+    # add loess line that excludes the ABOX date ANU-9915
+    geom_smooth(data =  dates_1989[!(dates_1989$Lab.Code %in% c("ANUA-9915")),]  , method = "loess", se = FALSE, span = 0.5, colour = "grey", alpha = 0.2, size = 1) +
     # set point size, colour and shape
     geom_point(size = 2, aes(colour = factor(Method), shape = factor(Method))) +
     # add error bars
@@ -181,10 +181,12 @@ p1 <-  ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
 
 
   # save plot as SVG for finessing...
-  ggsave(file="figures/MKII_dates_from_1989_for_paper.svg", width = 200, height = 200, units = "mm")
+  ggsave(file="figures/Fig_5_MKII_dates_from_1989_for_paper.svg", width = 200, height = 200, units = "mm")
 
-  # the some minor edits in inkscape to make the data point labels more readable
+  # then some minor edits in inkscape to make the data point labels more readable
   # especially spacing out the overlapping point labels
+
+
 return(p1)
 }
 
@@ -652,7 +654,7 @@ plots_lithics_data <- function(lithics, cal.date.lo){
     ylim(0,615)
   p1
   # save plot as SVG for finessing...
-  ggsave(file = "figures/lithics_over_time_from_1989_for_paper.svg")
+  ggsave(file = "figures/Fig_6_lithics_over_time_from_1989_for_paper.svg")
 
 
   # plot with ka along x-axis to help read peaks

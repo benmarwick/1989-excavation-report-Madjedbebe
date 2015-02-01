@@ -40,7 +40,7 @@ chrono_data_plotted <- plot_chrono_data(chrono_data_tidied,
                         oldest = chrono_data_interpolated$oldest,
                         base_of_dense_depth = chrono_data_interpolated$base_of_dense_depth,
                         dense = chrono_data_interpolated$dense)
-cat("<p><img src='figures/MKII_dates_from_1989_for_paper.svg'</p>")
+cat("<p><img src='figures/Fig_5_MKII_dates_from_1989_for_paper.svg'</p>")
 ```
 
 Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretations—stressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation — we confirm here that the lowest artefacts occur in Spit 49, 2.76 – 2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
@@ -169,7 +169,7 @@ bayes_cp_result <- bayes_cp_test(chrono_data_slopes_plot$dates_1989)
 ```{rplot-data}
 lithics_data_plotted <- plots_lithics_data(lithics_data,  bayes_cp_result$cal.date.lo)
 lithics_data_plotted$p1
-# figures/lithics_over_time_from_1989_for_paper.svg
+# figures/Fig_6_lithics_over_time_from_1989_for_paper.svg
 ```
 
 Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 6, Table 2). These show distinct pulses of accumulation, centred around 5, 7, 12.5, 18.4, 36, and 45 – 52 ka (Figure 6). Between Spits 37 – 39 (2.2 – 2.4 m bs) there are 1900 flaked stone artefacts from the 7 mm sieve (including 41 of exotic chert), numerous pieces of high-grade haematite (totalling 4.92 kg, including seven ground pieces), 143 g of red or yellow ochre, pieces of dolerite (presumed to be fragments of edge-ground axes) and fragments of grindstones; a further 568 flaked stone artefacts and 344 pieces of haematite were recovered from the pit fill at this level. All of these are associated with, or are slightly beneath, a TL age of 45 ± 9 ka. Beneath this, in levels dating 52 ± 11 to 61 ± 13 ka there were an additional 82 flaked stone artefacts and 52 pieces of haematite recovered from the 7 mm sieve. This is a comparatively large assemblage from a trench measuring only 1 x 1.5 m. It is unlikely the quartzite stone artefacts derive from downward displacement of artefacts from the predominately quartz assemblage that overlies it.  

@@ -30,6 +30,7 @@ git clone https://github.com/benmarwick/1989-excavation-report-Madjebebe.git
 Or to install, build and use the package within R, use this line at the R prompt:
 
 ``` r
+# install.packages("devtools") # which in turn needs Rtools (if Windows) or Xcode (if OSX)
 devtools::install_github("benmarwick/1989-excavation-report-Madjebebe", build_vignettes = TRUE)
 ```
 
@@ -45,7 +46,7 @@ This R package has several depedencies that are listed below, some of which need
 
 [![Circle CI](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe)
 
-This compendium is also available as a [Docker](https://docs.docker.com/installation) container. The advantage of this format is that it includes this package and all its dependencies already installed, so you don't have to worry about those. OSX & Windows users should launch [`boot2docker`](http://boot2docker.io/) to access the Docker terminal, Linux users can just open any terminal). You can either generate the Docker container yourself using the [Dockerfile](https://github.com/benmarwick/Steele_et_al_VR003_MSA_Pigments/blob/master/vignettes/Dockerfile) included here, or for a quicker start, pull the image from the [online registry](https://registry.hub.docker.com/u/benmarwick/mjb1989excavationpaper/) and run the container using this line at the Docker prompt:
+This compendium is also available as a [Docker](https://docs.docker.com/installation) container. The advantage of this format is that it includes this package and all its dependencies already installed, so you don't have to worry about those (e.g. `devtools` Rtools, Xcode, JAGS, etc). OSX & Windows users should launch [`boot2docker`](http://boot2docker.io/) to access the Docker terminal, Linux users can just open any terminal). You can either generate the Docker container yourself using the [Dockerfile](https://github.com/benmarwick/Steele_et_al_VR003_MSA_Pigments/blob/master/vignettes/Dockerfile) included here, or for a quicker start, pull the image from the [online registry](https://registry.hub.docker.com/u/benmarwick/mjb1989excavationpaper/) and run the container using this line at the Docker prompt:
 
 ``` r
 docker run -dp 8787:8787 benmarwick/mjb1989excavationpaper
