@@ -613,11 +613,12 @@ get_lithics_data <- function(){
 
 clean_lithics_data <- function(lithics){
 
-  # filter the data for display (remove some dates )
+  # filter the data for display (remove some dates that show inversions)
   lithics$C14 <- as.numeric(as.character(lithics$C14))
   lithics$C14[lithics$C14 %in% c(0.7, 15.0, 24)] <- NA
 
-  # filter anomalous spit
+
+  # filter anomalous spit, which has an usual depth value
   lithics <- lithics[!(lithics$Spit == 62),]
 
   # get rid of NA rows for total artefact count
@@ -635,7 +636,7 @@ clean_lithics_data <- function(lithics){
 #' @export
 #' @examples
 #' \dontrun{
-#' lithics_data_plotted <- plots_lithics_data(lithics_data, bayes_cp_result$cal.date.lo)
+#' lithics_data_plotted <- plots_lithics_data(lithics_data_cleaned, bayes_cp_result$cal.date.lo)
 #' }
 
 plots_lithics_data <- function(lithics, cal.date.lo){
@@ -650,8 +651,9 @@ plots_lithics_data <- function(lithics, cal.date.lo){
     ylab("Number of stone artefacts >6 mm") +
     annotate("text", x = lithics$Spit, y = 615, label = round(lithics$C14, 0), size = 4) +
     annotate("text", x = lithics$Spit, y = 615, label = round(lithics$OSL, 0), colour = "red", fontface="bold.italic", size = 4) +
-    annotate("text", x = 60, y = 615, label = "ka",size = 4) +
-    ylim(0,615)
+    annotate("text", x = 50, y = 615, label = "ka",size = 4) +
+    ylim(0,615) +
+    xlim(0,50)
   p1
   # save plot as SVG for finessing...
   ggsave(file = "figures/Fig_6_lithics_over_time_from_1989_for_paper.svg")
@@ -878,8 +880,8 @@ clust <- chclust(diss, method = "coniss")
 # remove NA d[is.na(d)] <- 0
 strat_plot[is.na(strat_plot)] <- 0
 
-# save plot to file
-png("figures/stratplot.png",width = 1000, height = 500)
+# save plot to file, this is figure 9
+png("figures/Fig_9_stratplot.png",width=10, height=5, units="in", res=1200)
 x <- strat.plot(strat_plot[,-ncol(strat_plot)] * 100,
                 scale.minmax = TRUE,
                 yvar = as.numeric(strat_plot$age),
@@ -940,19 +942,20 @@ lens_differences_raw <- function(){
   library("reshape2")
   dat_raw <- read.csv("data/Lithics_table_from_paper_on_1989_dig.csv")
 
-  dat_raw$part <- with(dat_raw, ifelse(Spit %in% c(37:40), 'above',
-                                       ifelse(Spit %in% c(41, 43, 62), 'lens',
-                                              ifelse(Spit %in% c(42, 44:49), 'below',
+  dat_raw$part <- with(dat_raw,
+                       ifelse(Spit %in% c(37:40), 'above',
+                            ifelse(Spit %in% c(41, 43, 62), 'lens',
+                                  ifelse(Spit %in% c(42, 44:49), 'below',
                                                      "who_cares"))))
 
   dat_raw[10:15,] <- apply(dat_raw[10:15,], 2, as.numeric)
 
   # combine Quartzite types
   dat_raw$Quartzite <- dat_raw %>%
-    select(Local.Coarse.Grained.Quartzite,
-           Fine.Grained.Exotic.Quartzite,
-           Brown.Quartzite) %>%
-    rowSums(na.rm = TRUE)
+      dplyr::select(Local.Coarse.Grained.Quartzite,
+            Fine.Grained.Exotic.Quartzite,
+            Brown.Quartzite) %>%
+           rowSums(na.rm = TRUE)
 
 
   # put things in order for the plot
@@ -976,6 +979,8 @@ p1 <- ggplot(dat_raw1, aes(variable, perc)) +
     ylab("Percentage")
 
 ggsave("figures/raw-materials-lens.png", width = par("din")[1] * 1.6)
+
+raw_dat_long <- dat_raw1
 
 p2 <- ggplot(dat_raw1, aes(part, perc, fill = variable)) +
     geom_bar(stat="identity", position=position_dodge()) +
@@ -1008,6 +1013,7 @@ raw_table <- dcast(ret, part ~ variable, value.var = 'n')[,-1]
 return(list(p1 = p1,
             p2 = p2,
             p3 = p3,
+            raw_dat_long =raw_dat_long,
             raw_chi_fisher = raw_chi_fisher,
             raw_table = raw_table))
 
@@ -1088,6 +1094,8 @@ p1 <- ggplot(dat_tech1, aes(variable, percentage)) +
 
 ggsave("figures/tech-lens-difference.png", width = par("din")[1] * 1.6)
 
+tech_dat_long <- dat_tech1
+
 
 # The plot of the types in each zone by percentage of the entire count of types for spits
 ggplot(dat_tech_all, aes(variable, percentage)) +
@@ -1120,11 +1128,30 @@ tech_chi_fisher <- fisher.test(tech_table, simulate.p.value=TRUE)
 return(list(p1 = p1,
             tech_chi_fisher = tech_chi_fisher,
             tech_table = tech_table,
-            dat_tech1 = dat_tech1))
+            tech_dat_long = tech_dat_long))
 
 }
 
+############################################################
+#' Combine raw materials and technology plots for upper-lens-lower
+#'
+#'
+#'
+#' @export
+#' @examples
+#' \dontrun{
+#' lens_tech_and_raw_plot <- combine_lens_plots(lens_differences_tech_plot$p1,lens_differences_raw_plot$p1)
+#' }
 
+combine_lens_plots <- function(tech_dat_plot, raw_dat_plot) {
+
+  png("figures/Fig_10_combine_lens_plots.png",width=16, height=10, units="in", res=1200)
+
+  gridExtra::grid.arrange(raw_dat_plot, tech_dat_plot)
+
+  dev.off()
+
+}
 
 
 ############################################################
@@ -1737,7 +1764,7 @@ g <- ggplot(perc_and_mass_m, aes(Taxon, value)) +
   facet_grid(variable ~ Spit, scales = "free_y")
 
 # save plot as PNG
-ggsave(file = "figures/shell_from_1989_for_paper.png", g)
+ggsave(file = "figures/Fig_14_shell_from_1989_for_paper.png", g, dpi = 1200)
 
 return(g)
 

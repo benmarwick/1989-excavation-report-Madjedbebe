@@ -134,7 +134,7 @@ bayes_slope_posteriors <- bayes_slope_difference(sed_rates_15_to_20_result$sub_O
 # from a run so we can use that rather than redo the analysis. To
 # redo the analysis, simply run the code in the previous chunk.
 load("data/slopes_test_sub.rda")
-summary(slopes_test_sub)
+BEST:::summary.BEST(slopes_test_sub)
 # print(slopes_test_sub)
 # plot(slopes_test_sub)
 # windows()
@@ -159,15 +159,8 @@ lithics_data <- get_lithics_data()
 lithics_data_cleaned <- clean_lithics_data(lithics_data)
 ```
 
-
-```{r get_interp, results='hide', include=FALSE}
-# need these to get  bayes_cp_result$cal.date.lo)
-chrono_data_slopes_plot <- plotting_slopes_chrono_data(chrono_data_tidied)
-bayes_cp_result <- bayes_cp_test(chrono_data_slopes_plot$dates_1989)
-```
-
 ```{rplot-data}
-lithics_data_plotted <- plots_lithics_data(lithics_data,  bayes_cp_result$cal.date.lo)
+lithics_data_plotted <- plots_lithics_data(lithics_data_cleaned,  bayes_cp_result$cal.date.lo)
 lithics_data_plotted$p1
 # figures/Fig_6_lithics_over_time_from_1989_for_paper.svg
 ```
@@ -183,21 +176,26 @@ lithics_rawmaterials_plotted <- plots_lithics_rawmaterials(lithics_data,
 
 ```{r strat-plot}
 lithics_rawmaterials_stratplotted <- stratiplot_lithics(lithics_rawmaterials_plotted$plot2)
-# figures/stratplot.svg
+# figures/Fig_9_stratplot.png
 ```
 
 
 ```{r lens-raw-materials}
 lens_differences_raw_plot <- lens_differences_raw()
-lens_differences_raw_plot$p1
 raw_fish_pval <- formatC(round(lens_differences_raw_plot$raw_chi_fisher$p.value, 4), big.mark=",",format="f", drop0trailing = TRUE)
 ```
 
 ```{r lens-tech-difference}
 lens_differences_tech_plot <- lens_differences_tech()
-lens_differences_tech_plot$p1
 tech_fish_pval <- round(lens_differences_tech_plot$tech_chi_fisher$p.value, 3)
 ```
+
+```{r lens-tech-and-raw-plot, results = "asis"}
+lens_tech_and_raw_plot <- combine_lens_plots(lens_differences_tech_plot$p1,lens_differences_raw_plot$p1)
+lens_tech_and_raw_plot
+cat("<p><img src='figures/Fig_10_combine_lens_plots.png'</p>")
+```
+
 
 Chi square tests indicate that the differences in raw material proportions between all three assemblages are highly significant (p = `r raw_fish_pval`), although the differences in technological composition are not significant (p = `r tech_fish_pval`), most likely due to small sample size (n = 10 for types in the assemblage below the lens).  
 

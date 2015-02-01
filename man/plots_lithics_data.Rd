@@ -11,7 +11,7 @@ Plots of the lithics raw data
 }
 \examples{
 \dontrun{
-lithics_data_plotted <- plots_lithics_data(lithics_data, bayes_cp_result$cal.date.lo)
+lithics_data_plotted <- plots_lithics_data(lithics_data_cleaned, bayes_cp_result$cal.date.lo)
 }
 }
 
