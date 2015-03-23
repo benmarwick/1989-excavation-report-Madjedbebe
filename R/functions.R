@@ -882,6 +882,9 @@ strat_plot[is.na(strat_plot)] <- 0
 
 # save plot to file, this is figure 9
 png("figures/Fig_9_stratplot.png",width=10, height=5, units="in", res=1200)
+
+par(oma=c(2,2,2,2))
+
 x <- strat.plot(strat_plot[,-ncol(strat_plot)] * 100,
                 scale.minmax = TRUE,
                 yvar = as.numeric(strat_plot$age),
@@ -896,7 +899,8 @@ x <- strat.plot(strat_plot[,-ncol(strat_plot)] * 100,
                 scale.percent = TRUE,
                 clust = clust
 )
-
+mtext("Percentage of artefacts",
+      side = 1, line = 5, cex = 1.0)
 # draws on red lines to indicate pit feature
 addZone(x, Zones, col = 'red')
 # text(10, 10, labels = "Pit feature")
@@ -917,7 +921,8 @@ x <- strat.plot(strat_plot[,-ncol(strat_plot)] * 100,
                 scale.percent = TRUE,
                 clust = clust
 )
-
+mtext("Percentage of artefacts",
+      side = 1, line = 5, cex = 0.5)
 # draws on red lines to indicate pit feature
 addZone(x, Zones, col = 'red')
 # text(10, 59.5, labels = "Pit feature")

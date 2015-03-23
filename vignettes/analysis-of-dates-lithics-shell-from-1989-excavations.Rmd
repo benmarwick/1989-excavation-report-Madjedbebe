@@ -14,7 +14,8 @@ This document contains the source code used to generate the plots and statistics
 
 ```{r, echo = FALSE}
 library(knitr)
-opts_chunk$set(fig.width = 7, messages = FALSE, warning = FALSE)
+library(Cairo)
+opts_chunk$set(fig.width = 7, messages = FALSE, warning = FALSE, dev = "CairoPNG")
 ```
 
 ### OSL and C14 dates
