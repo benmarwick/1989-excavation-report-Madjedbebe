@@ -1150,7 +1150,7 @@ return(list(p1 = p1,
 
 combine_lens_plots <- function(tech_dat_plot, raw_dat_plot) {
 
-  png("figures/Fig_10_combine_lens_plots.png",width=16, height=10, units="in", res=1200)
+  png("figures/Fig_10_combine_lens_plots.png",width=16, height=10, units="in", res=600)
 
   gridExtra::grid.arrange(raw_dat_plot, tech_dat_plot)
 

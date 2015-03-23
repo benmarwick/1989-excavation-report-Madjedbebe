@@ -14,8 +14,7 @@ This document contains the source code used to generate the plots and statistics
 
 ```{r, echo = FALSE}
 library(knitr)
-library(Cairo)
-opts_chunk$set(fig.width = 7, messages = FALSE, warning = FALSE, dev = "CairoPNG")
+opts_chunk$set(fig.width = 7, messages = FALSE, warning = FALSE)
 ```
 
 ### OSL and C14 dates
@@ -44,9 +43,9 @@ chrono_data_plotted <- plot_chrono_data(chrono_data_tidied,
 cat("<p><img src='figures/Fig_5_MKII_dates_from_1989_for_paper.svg'</p>")
 ```
 
-Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretations—stressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation — we confirm here that the lowest artefacts occur in Spit 49, 2.76 – 2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
+Based on the TL age estimates and the artefact distribution, Roberts et al. (1990a) suggested first occupation at the site began 55 ± 5 ka. Although the excavators were conservative in their interpretation sstressing the upper (i.e. 50 ka) limit of this age range and taking the lower limit of the high density band of artefacts (2.4 m bs) as the actual level of initial occupation  we confirm here that the lowest artefacts occur in Spit 49, 2.76  2.8 m deep below surface and are bracketed by the original OSL age estimate of 55.5 ± 8.2 ka (KTL-162) and the TL estimate of 65 ± 14 ka (KTL-141). Subsequent redating of several of the lower samples at MJB using single grain and single aliquot OSL methods reduced the error ranges for the lower dates substantially, but did not alter the original results (Roberts et al. 1998). 
 
-At the time of Roberts et al.’s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001 – 17,429 cal BP, overlapping at 1σ with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allen’s (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1σ with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1σ of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
+At the time of Roberts et al.s (1998) publication and commentary no calibration curve was available for radiocarbon dates greater than 11 ka, and hence the issue of underestimation of calendar years could not be resolved. A calibration curve is now available back to 50 ka (Reimer et al. 2013). The IntCal13 calibration curve results in a calibrated age for the 13.39 ka age (ANU-7006) as 15,001  17,429 cal BP, overlapping at 1Ï with the TL age of 15 ± 3 ka (KTL-165) at equivalent depth. Kamminga and Allens (1973) 18.04 ka age (SUA-265)    calibrates to c. 22.4 - 21.0 ka, overlapping at 1Ï with the TL age of 24 ± 5 ka (KTL-97) at equivalent depth. The 14.9 ka age (ANU-7007) provided by Roberts et al. (1998) calibrates to 18.5 - 17.8 ka, and remains within 1Ï of the TL age of KTL-97. These new calibrations show that conventional radiocarbon years do substantially under-estimate the ages of the sediments and that calendar ages show a strong correlation with luminescence ages. 
 
 ```{r difference-in-slope-plot}
 chrono_data_slopes_plot <- plotting_slopes_chrono_data(chrono_data_tidied)
@@ -110,7 +109,7 @@ bayes_cp_result <- bayes_cp_test(chrono_data_slopes_plot$dates_1989)
 Bayesian change point analysis indicates that sedimentation rates slow substantially below 2.0 m to the base of occupation (posterior probability of change is  `r round(bayes_cp_result$hi_probs[1,]$"cp$posterior.prob",3)` at `r round(bayes_cp_result$hi_probs[1,]$age2plot,0)` ka cal BP) and then accelerate again below the lowest occupation (posterior probability of change is `r round(bayes_cp_result$hi_probs[2,]$"cp$posterior.prob",3)` at `r round(bayes_cp_result$hi_probs[2,]$age2plot,0)` ka).
 
 ```{r sed-rates-15-20-ka}
-# check 15 – 20 ka sedimentation rates
+# check 15  20 ka sedimentation rates
 # examine slope from KTL97 through KTL165 compare C14 to OSL
 # now limit for depth range KTL97 through KTL165
 
@@ -145,7 +144,7 @@ BEST:::summary.BEST(slopes_test_sub)
 
 ```
 
-Sedimentation rates indicated by 14C and OSL ages during the period 15 – 20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = `r round(summary(slopes_test_sub)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test_sub)[3, 5:6]),2)`, the interval includes zero, indicating no credible difference). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
+Sedimentation rates indicated by 14C and OSL ages during the period 15  20 ka, just before the first major change in sedimentation rates, are not credibly different (Bayesian estimation of difference in means = `r round(summary(slopes_test_sub)[3], 2)`, 95% HDI = `r round(unname(summary(slopes_test_sub)[3, 5:6]),2)`, the interval includes zero, indicating no credible difference). Although there are no reliable 14C ages older than 20 ka, the lack of difference in rates between the two methods before this time suggests that the change in sedimentation rates was a real event, rather than an effect of changes in the age-depth relationship between 14C and luminescence methods. The depth-age curve also allows us to estimate the likely age of the lowest artefact as approximately 64 ka, and the base of the dense artefact layer as approximately 55 ka (though it must be acknowledged, that the error ranges on these lowest luminescence ages are large). Any possible refinement of temporal resolution cannot be addressed prior to analysis of new samples collected in 2012. Non-local stone in the form of silcrete is present from Spit 47 (2.9m bs), suggesting human activity at this level, but artefact numbers do not increase markedly until Spit 45. 
 
 
 ### Lithics
@@ -166,7 +165,7 @@ lithics_data_plotted$p1
 # figures/Fig_6_lithics_over_time_from_1989_for_paper.svg
 ```
 
-Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 6, Table 2). These show distinct pulses of accumulation, centred around 5, 7, 12.5, 18.4, 36, and 45 – 52 ka (Figure 6). Between Spits 37 – 39 (2.2 – 2.4 m bs) there are 1900 flaked stone artefacts from the 7 mm sieve (including 41 of exotic chert), numerous pieces of high-grade haematite (totalling 4.92 kg, including seven ground pieces), 143 g of red or yellow ochre, pieces of dolerite (presumed to be fragments of edge-ground axes) and fragments of grindstones; a further 568 flaked stone artefacts and 344 pieces of haematite were recovered from the pit fill at this level. All of these are associated with, or are slightly beneath, a TL age of 45 ± 9 ka. Beneath this, in levels dating 52 ± 11 to 61 ± 13 ka there were an additional 82 flaked stone artefacts and 52 pieces of haematite recovered from the 7 mm sieve. This is a comparatively large assemblage from a trench measuring only 1 x 1.5 m. It is unlikely the quartzite stone artefacts derive from downward displacement of artefacts from the predominately quartz assemblage that overlies it.  
+Stone artefacts are present in every spit of the 1989 excavation at MJB (Figure 6, Table 2). These show distinct pulses of accumulation, centred around 5, 7, 12.5, 18.4, 36, and 45  52 ka (Figure 6). Between Spits 37  39 (2.2  2.4 m bs) there are 1900 flaked stone artefacts from the 7 mm sieve (including 41 of exotic chert), numerous pieces of high-grade haematite (totalling 4.92 kg, including seven ground pieces), 143 g of red or yellow ochre, pieces of dolerite (presumed to be fragments of edge-ground axes) and fragments of grindstones; a further 568 flaked stone artefacts and 344 pieces of haematite were recovered from the pit fill at this level. All of these are associated with, or are slightly beneath, a TL age of 45 ± 9 ka. Beneath this, in levels dating 52 ± 11 to 61 ± 13 ka there were an additional 82 flaked stone artefacts and 52 pieces of haematite recovered from the 7 mm sieve. This is a comparatively large assemblage from a trench measuring only 1 x 1.5 m. It is unlikely the quartzite stone artefacts derive from downward displacement of artefacts from the predominately quartz assemblage that overlies it.  
 
 ```{r raw-materials}
 lithics_rawmaterials_plotted <- plots_lithics_rawmaterials(lithics_data, 
@@ -194,7 +193,7 @@ tech_fish_pval <- round(lens_differences_tech_plot$tech_chi_fisher$p.value, 3)
 ```{r lens-tech-and-raw-plot, results = "asis"}
 lens_tech_and_raw_plot <- combine_lens_plots(lens_differences_tech_plot$p1,lens_differences_raw_plot$p1)
 lens_tech_and_raw_plot
-cat("<p><img src='figures/Fig_10_combine_lens_plots.png'</p>")
+cat("<p><img src='figures/Fig_10_combine_lens_plots.png', width='100%'></p>")
 ```
 
 
