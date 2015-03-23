@@ -50,7 +50,7 @@ Or to install, build and use the package within R, use this line at the R prompt
 devtools::install_github("benmarwick/1989-excavation-report-Madjebebe", build_vignettes = TRUE)
 ```
 
-Then you can read the manuscript using this line at the R prompt:
+Then you can read the text & figures using this line at the R prompt:
 
 ```{r, eval=FALSE}
 browseVignettes("mjb1989excavationpaper")
@@ -62,7 +62,7 @@ This R package has several depedencies that are listed below, some of which need
 
 [![Circle CI](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe)
 
-This compendium is also available as a [Docker](https://docs.docker.com/installation) container. The advantage of this format is that it includes this package and all its dependencies already installed, so you don't have to worry about those (e.g. `devtools` Rtools, Xcode, JAGS, etc). OSX & Windows users should launch [`boot2docker`](http://boot2docker.io/) to access the Docker terminal, Linux users can just open any terminal). You can either generate the Docker container yourself using the [Dockerfile](https://github.com/benmarwick/Steele_et_al_VR003_MSA_Pigments/blob/master/vignettes/Dockerfile) included here, or for a quicker start, pull the image from the [online registry](https://registry.hub.docker.com/u/benmarwick/mjb1989excavationpaper/) and run the container using this line at the Docker prompt: 
+This compendium is also available as a [Docker](https://docs.docker.com/installation) container. The advantage of this format is that it includes this package and all its dependencies already installed, so you don't have to worry about those (e.g. `devtools` Rtools, Xcode, JAGS, etc). OSX & Windows users should launch [`boot2docker`](http://boot2docker.io/) to access the Docker terminal, Linux users can just open any terminal). You can either generate the Docker container yourself using the [Dockerfile](https://github.com/benmarwick/1989-excavation-report-Madjebebe/blob/master/Dockerfile) included here, or for a quicker start, pull the image from the [online registry](https://registry.hub.docker.com/u/benmarwick/mjb1989excavationpaper/) and run the container using this line at the Docker prompt: 
 
 ```{r eval=FALSE}
 docker run -dp 8787:8787 benmarwick/mjb1989excavationpaper
@@ -70,22 +70,22 @@ docker run -dp 8787:8787 benmarwick/mjb1989excavationpaper
 
 Then you can interact with RStudio via your browser at localhost:8787 (on Linux) or http://192.168.59.103:8787/ (on Windows/OSX, or whatever address you get from `boot2docker ip` at the shell prompt). Log in to RStudio with user: `rstudio` and password: `rstudio`. See the [rocker-org Wiki](https://github.com/rocker-org/rocker/wiki/Using-the-RStudio-image) for more details. In RStudio you'll see the `Rmd` file for the manuscript and a directory for the raw data. You can knit the `Rmd` file to produce the HTML file that reproduces the text, plots and other results of the analysis. You can also edit and run the `Rmd` interactively in RStudio to explore the analysis further. 
 
-I developed and tested the package on this Docker container, so this is the only platform that I'm confident it works on, and so recommend to anyone wanting to use this package. 
+I developed and tested the package on this Docker container, so this is the only platform that I'm confident it works on, and so recommend to anyone wanting to use this package to generate the vignette, etc. 
 
 ### Licenses:
 
 Text: CC-BY-4.0 http://creativecommons.org/licenses/by/4.0/
 
-Code: MIT http://opensource.org/licenses/MIT year: 2015, copyright holder: Ben Marwick)
+Code: MIT http://opensource.org/licenses/MIT year: 2015, copyright holder: Ben Marwick
 
 Data: CC0 http://creativecommons.org/publicdomain/zero/1.0/ 
 
 
 ### Notes and resources ##
 
-* The [issues tracker](https://github.com/benmarwick/1989-excavation-report-Madjebebes) is the place to report problems or ask questions  
+* The [issues tracker](https://github.com/benmarwick/1989-excavation-report-Madjebebe/issues) is the place to report problems or ask questions  
 
-* See the repository [history](https://github.com/benmarwick/1989-excavation-report-Madjebebe) for a fine-grained view of progress and changes.
+* See the repository [history](https://github.com/benmarwick/1989-excavation-report-Madjebebe/commits/master) for a fine-grained view of progress and changes.
 
 * The organisation of this compendium is based on the work of [Carl Boettiger](http://www.carlboettiger.info/) 
 
