@@ -16,15 +16,17 @@ This repository contains the research compendium of our work on the 1989 excavat
 
 ### How to use
 
-#### Read the manuscript
+#### Read the code, access the data
 
-See the [`vignettes`](https://github.com/benmarwick/1989-excavation-report-Madjebebe/tree/master/vignettes) directory here on GitHub for source code and data for the manuscript.
+See the [`vignettes`](https://github.com/benmarwick/1989-excavation-report-Madjebebe/tree/master/vignettes) directory on GitHub for the source code that generated the figures and statistical results contained in the manuscript.
+
+See the [`data`](https://github.com/benmarwick/1989-excavation-report-Madjebebe/tree/master/vignettes/data) directory to access the raw data discussed in the manuscript.
 
 #### Install the R package
 
 [![Build Status](https://travis-ci.org/benmarwick/1989-excavation-report-Madjebebe.svg?branch=master)](https://travis-ci.org/benmarwick/1989-excavation-report-Madjebebe)
 
-This repository is organized as an R package, providing functions and raw data to reproduce and extend the analysis reported in the publication. Note that this package has been written explicitly for this project and may not be suitable for more general use. To download the package source as you see it here on GitHub, for offline browsing, use this line at the shell prompt:
+This repository is organized as an R package, providing functions and raw data to reproduce and extend the analysis reported in the publication. Note that this package has been written explicitly for this project and may not be suitable for more general use. To download the package source as you see it on GitHub, for offline browsing, use this line at the shell prompt:
 
 ``` r
 git clone https://github.com/benmarwick/1989-excavation-report-Madjebebe.git
