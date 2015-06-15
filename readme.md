@@ -12,7 +12,11 @@ Ben Marwick (<benmarwick@gmail.com>)
 
 ### Contents
 
-This repository contains the research compendium of our work on the 1989 excavation of Malakanuja II (Madgebebe). The compendium contains all data, code, and text associated with this section of the publication (which is currently under review).
+This repository contains the research compendium of our work on the 1989 excavation of Malakanuja II (Madgebebe). The compendium contains all data, code, and text associated with this section of the publication:
+
+> Clarkson, C., Mike Smith, Ben Marwick, Richard Fullagar, Lynley A. Wallis, Patrick Faulkner, Tiina Manne, Elspeth Hayes, Richard G. Roberts, Zenobia Jacobs, Xavier Carah, Kelsey M. Lowe, Jacqueline Matthews, S. Anna Florin 2015 The archaeology, chronology and stratigraphy of Madjedbebe (Malakunanja II): A site in northern Australia with early occupation. *Journal of Human Evolution* Volume 83, June 2015, Pages 46–64 <http://dx.doi.org/10.1016/j.jhevol.2015.03.014>
+
+The paper is available as an [Open Access author-accepted manuscript](https://digital.lib.washington.edu/researchworks/handle/1773/33254), or the final published copy on the subscription-only site for the [Journal of Human Evolution](http://www.sciencedirect.com/science/article/pii/S0047248415000846)
 
 ### How to use
 
@@ -81,22 +85,6 @@ Data: CC0 <http://creativecommons.org/publicdomain/zero/1.0/>
 
 ``` r
 sessionInfo()
-#> R version 3.1.2 (2014-10-31)
-#> Platform: x86_64-pc-linux-gnu (64-bit)
-#> 
-#> locale:
-#>  [1] LC_CTYPE=en_US.UTF-8 LC_NUMERIC=C         LC_TIME=C           
-#>  [4] LC_COLLATE=C         LC_MONETARY=C        LC_MESSAGES=C       
-#>  [7] LC_PAPER=C           LC_NAME=C            LC_ADDRESS=C        
-#> [10] LC_TELEPHONE=C       LC_MEASUREMENT=C     LC_IDENTIFICATION=C 
-#> 
-#> attached base packages:
-#> [1] stats     graphics  grDevices utils     datasets  methods   base     
-#> 
-#> loaded via a namespace (and not attached):
-#> [1] digest_0.6.8    evaluate_0.5.5  formatR_1.0     htmltools_0.2.6
-#> [5] knitr_1.9       rmarkdown_0.5.1 stringr_0.6.2   tools_3.1.2    
-#> [9] yaml_2.1.13
 ## R version 3.1.2 (2014-10-31)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## 
