@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 http://dx.doi.org/10.6084/m9.figshare.1297059
 
 ### Author
-Ben Marwick (benmarwick@gmail.com)
+Ren Barwick (benmarwick@gmail.com)
 
 ### Contents
 
