@@ -159,7 +159,7 @@ lithics_data <- get_lithics_data()
 lithics_data_cleaned <- clean_lithics_data(lithics_data)
 ```
 
-```{rplot-data}
+```{r plot-data}
 lithics_data_plotted <- plots_lithics_data(lithics_data_cleaned,  bayes_cp_result$cal.date.lo)
 lithics_data_plotted$p1
 # figures/Fig_6_lithics_over_time_from_1989_for_paper.svg
