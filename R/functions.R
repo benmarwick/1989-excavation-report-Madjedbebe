@@ -127,15 +127,16 @@ interpolate_chrono_data <- function(dates_1989){
 plot_chrono_data <- function(dates_1989, oldest_depth, oldest, base_of_dense_depth, dense){
 
   library(ggplot2)
+  library(grid)
   limits <- aes(ymax = age2plot  + Error/1000, ymin = age2plot  - Error/1000, colour = factor(Method))
   library(scales) # needed for axis number format
-p1 <-  ggplot(dates_1989, aes(Depth.m, age2plot, , label = Lab.Code)) +
+p1 <-  ggplot(dates_1989, aes(Depth.m, age2plot,  label = Lab.Code)) +
     # add loess line that excludes the ABOX date ANU-9915
     geom_smooth(data =  dates_1989[!(dates_1989$Lab.Code %in% c("ANUA-9915")),]  , method = "loess", se = FALSE, span = 0.5, colour = "grey", alpha = 0.2, size = 1) +
     # set point size, colour and shape
     geom_point(size = 2, aes(colour = factor(Method), shape = factor(Method))) +
     # add error bars
-    geom_linerange(limits, width=0.5) +
+    geom_linerange(limits) +
     # add lab codes as point labels
     geom_text(angle = 0,  hjust = -0.2, vjust = 0.2, size = 2) +
     # Edit axis labels
