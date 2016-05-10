@@ -136,33 +136,33 @@ p1 <-  ggplot(dates_1989, aes(Depth.m, age2plot,  label = Lab.Code)) +
     # set point size, colour and shape
     geom_point(size = 2, aes(colour = factor(Method), shape = factor(Method))) +
     # add error bars
-    geom_linerange(limits) +
+    geom_linerange(limits) + # remove  width=0.5
     # add lab codes as point labels
     geom_text(angle = 0,  hjust = -0.2, vjust = 0.2, size = 2) +
     # Edit axis labels
     xlab("meters below surface") + ylab("x 1000 years cal. BP") +
     # scale title
-    scale_colour_discrete(name  ="Dating\nmethod" ) +
-    scale_shape_discrete(name  ="Dating\nmethod" ) +
+    scale_colour_discrete(name  = "Dating\nmethod" ) +
+    scale_shape_discrete(name  = "Dating\nmethod" ) +
     # format y axis for readability
     scale_y_continuous(labels = comma, breaks = seq(0,100,20)) +
     scale_x_reverse() + # top to bottom of the trench
     # lines for lowest artefacts at 2.8 m
     annotate("segment", x = oldest_depth/100,
-             y = oldest, xend = -4.75,
+             y = oldest, xend = 4.75,
              yend = oldest, colour = "grey30") +
     annotate("segment",x = oldest_depth/100,
-             y = 0, xend = -oldest_depth/100,
+             y = 0, xend = oldest_depth/100,
              yend = oldest, colour = "grey30") +
     annotate("text", x = 3, y = 15,
              label = paste0("lowest artefacts (", round(oldest,0), " ka BP)"),
              size = 3) +
     # lines for dense concentration at 2.5 m
     annotate("segment", x = base_of_dense_depth/100,
-             y = dense, xend = -4.75,
+             y = dense, xend = 4.75,
              yend = dense, colour = "grey30") +
     annotate("segment", x = base_of_dense_depth/100,
-             y = 0, xend = -base_of_dense_depth/100,
+             y = 0, xend = base_of_dense_depth/100,
              yend = dense, , colour = "grey30") +
     annotate("text", x = 2.5, y = 15,
              label = paste0("base of dense \noccupation layer (", round(dense,0), " ka BP)"), size = 3) +
