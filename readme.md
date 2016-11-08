@@ -1,4 +1,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+[![Last-changedate](https://img.shields.io/badge/last%20change-2016--11--08-brightgreen.svg)](https://github.com/benmarwick/1989-excavation-report-Madjebebe/commits/master) [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.2.4-brightgreen.svg)](https://cran.r-project.org/) [![Licence](https://img.shields.io/github/license/mashape/apistatus.svg)](http://choosealicense.com/licenses/mit/) [![Travis-CI Build Status](https://travis-ci.org/benmarwick/1989-excavation-report-Madjebebe.png?branch=master)](https://travis-ci.org/benmarwick/1989-excavation-report-Madjebebe) [![Circle CI](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe) [![ORCiD](https://img.shields.io/badge/ORCiD-0000--0001--7879--4531-green.svg)](http://orcid.org/0000-0001-7879-4531)
+
 1989-excavation-report-Madjebebe
 ================================
 
