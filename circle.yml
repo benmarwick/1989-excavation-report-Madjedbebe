@@ -8,8 +8,10 @@ dependencies:
     - docker build -t benmarwick/mjb1989excavationpaper https://raw.githubusercontent.com/benmarwick/1989-excavation-report-Madjebebe/master/Dockerfile
 test:
   override:
-    - docker run -d -p 8787:8787 benmarwick/mjb1989excavationpaper; sleep 10
+    - docker run --name mjb1989excavationpaper -d -p 8787:8787 benmarwick/mjb1989excavationpaper; sleep 10
     - curl --retry 10 --retry-delay 5 -v http://localhost:8787
+    # render main manuscript file in container...
+    - sudo lxc-attach -n "$(docker inspect --format "{{.Id}}" mjb1989excavationpaper)" -- Rscript -e "rmarkdown::render('/mjb1989excavationpaper/vignettes/paper/analysis-of-dates-lithics-shell-from-1989-excavations.Rmd')"
 
 deployment:
   hub:

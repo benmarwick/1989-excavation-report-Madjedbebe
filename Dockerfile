@@ -12,17 +12,9 @@ RUN apt-get update \
     # install my package that is the focus of this image
     benmarwick/1989-excavation-report-Madjebebe
 
-# make a directory to hold the github repo for my package
-RUN mkdir /home/rstudio/1989-excavation-report-Madjebebe
 
 # Get my package source files from github and download onto Docker. The built package that we already got above is no good because it doesn't have the vignette directory in the same structure as the package source
-RUN git clone https://github.com/benmarwick/1989-excavation-report-Madjebebe.git   /home/rstudio/1989-excavation-report-Madjebebe
-
-# Keep only the vignette folder that has the Rmd file and data files. Because the package has already been loaded, the functions are already present in the environment. So we just want to present to the user the Rmd file and the data so they can knit the Rmd into the document, or work interactively with the code in the Rmd to explore the analysis and the data.
-RUN cd /home/rstudio/1989-excavation-report-Madjebebe \
-  && cp -a /home/rstudio/1989-excavation-report-Madjebebe/vignettes/. /home/rstudio/ \
-  && cd /home/rstudio/ \
-  && rm -r 1989-excavation-report-Madjebebe
+RUN git clone https://github.com/benmarwick/1989-excavation-report-Madjebebe.git  
 
 # Set the working directory
 WORKDIR /home/rstudio/
