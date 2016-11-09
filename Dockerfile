@@ -16,9 +16,6 @@ RUN apt-get update \
 # Get my package source files from github and download onto Docker. The built package that we already got above is no good because it doesn't have the vignette directory in the same structure as the package source
 RUN git clone https://github.com/benmarwick/1989-excavation-report-Madjebebe.git  
 
-# Set the working directory
-WORKDIR /home/rstudio/
-
 
 # to build this image:
 # docker build -t benmarwick/mjb1989excavationpaper https://raw.githubusercontent.com/benmarwick/1989-excavation-report-Madjebebe/master/Dockerfile
