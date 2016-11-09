@@ -10,7 +10,9 @@ RUN apt-get update \
   # install a few packages from GitHub for the most recent versions (or if they're not on CRAN)
   && installGithub.r --deps TRUE \
     # install my package that is the focus of this image
-    benmarwick/1989-excavation-report-Madjebebe
+    benmarwick/1989-excavation-report-Madjebebe \
+
+  && chmod 777 -R mjb1989excavationpaper
 
 
 # Get my package source files from github and download onto Docker. The built package that we already got above is no good because it doesn't have the vignette directory in the same structure as the package source
