@@ -8,6 +8,7 @@ COPY . /mjb1989excavationpaper
  # go into the repo directory
 RUN . /etc/environment \
 
+  && apt-get update -y  \
   && apt-get install -y  r-cran-rjags \
 
   # build this compendium package, get deps from MRAN
