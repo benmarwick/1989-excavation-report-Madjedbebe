@@ -6,10 +6,12 @@ MAINTAINER Ben Marwick <benmarwick@gmail.com>
 
 COPY . /mjb1989excavationpaper
  # go into the repo directory
-RUN . /etc/environment \
+RUN  && apt-get update -y  \
+     && apt-get install -y  r-cran-rjags \
 
-  && apt-get update -Y  \
-  && apt-get install -y  r-cran-rjags \
+     && . /etc/environment \
+
+ 
 
   # build this compendium package, get deps from MRAN
   # set date here manually
