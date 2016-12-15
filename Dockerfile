@@ -6,7 +6,7 @@ MAINTAINER Ben Marwick <benmarwick@gmail.com>
 
 COPY . /mjb1989excavationpaper
  # go into the repo directory
-RUN  && apt-get update -y  \
+RUN  apt-get update -y  \
      && apt-get install -y  r-cran-rjags \
 
      && . /etc/environment \
