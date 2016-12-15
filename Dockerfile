@@ -8,7 +8,7 @@ COPY . /mjb1989excavationpaper
  # go into the repo directory
 RUN  . /etc/environment \
 
- 
+ && ls \
 
   # build this compendium package, get deps from MRAN
   # set date here manually
