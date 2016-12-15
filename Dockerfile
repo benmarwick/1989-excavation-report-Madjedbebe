@@ -1,16 +1,21 @@
-# get the base image, this one has R, RStudio, pandoc, and a bunch of R packages that I use often
-FROM rocker/hadleyverse
+# get the base image, this one has R, RStudio and pandoc
+FROM rocker/verse:3.3.2
 
 # required
 MAINTAINER Ben Marwick <benmarwick@gmail.com>
 
-# install some packages that not in the base image, these have to be manually identified from my package's Description -> Imports list
-RUN apt-get update \
+COPY . /mjb1989excavationpaper
+ # go into the repo directory
+RUN . /etc/environment \
+
   && apt-get install -y  r-cran-rjags \
-  # install a few packages from GitHub for the most recent versions (or if they're not on CRAN)
-  && installGithub.r --deps TRUE \
-    # install my package that is the focus of this image
-    benmarwick/mjb1989excavationpaper \
+
+  # build this compendium package, get deps from MRAN
+  # set date here manually
+  && R -e "options(repos='https://mran.microsoft.com/snapshot/2016-11-30'); devtools::install('/mjb1989excavationpaper', dep=TRUE)" \
+
+ # render the manuscript into a docx
+  && R -e "rmarkdown::render('/mjb1989excavationpaper/vignettes/analysis-of-dates-lithics-shell-from-1989-excavations.Rmd')"
 
 
 
