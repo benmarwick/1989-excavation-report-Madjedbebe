@@ -5,14 +5,9 @@ FROM rocker/verse:3.3.2
 MAINTAINER Ben Marwick <benmarwick@gmail.com>
 
 COPY . /mjb1989excavationpaper \
-&& chmod 777 -R mjb1989excavationpaper 
 
  # go into the repo directory
-RUN  . /etc/environment \
-
- && ls -alF \
- && cd mjb1989excavationpaper && ls -alFR \
- 
+RUN  . /etc/environment \ 
 
   # build this compendium package, get deps from MRAN
   # set date here manually
