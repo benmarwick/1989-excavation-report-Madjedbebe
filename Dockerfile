@@ -4,7 +4,7 @@ FROM rocker/verse:3.3.2
 # required
 MAINTAINER Ben Marwick <benmarwick@gmail.com>
 
-COPY . /mjb1989excavationpaper \
+COPY . /mjb1989excavationpaper 
 
  # go into the repo directory
 RUN  . /etc/environment \ 
