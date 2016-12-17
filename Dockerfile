@@ -8,8 +8,8 @@ COPY . /mjb1989excavationpaper
  # go into the repo directory
 RUN  . /etc/environment \
 
- && ls -alF\
- && cd mjb1989excavationpaper && ls -alF \
+ && ls -alFR \
+ && cd mjb1989excavationpaper && ls -alFR \
 
   # build this compendium package, get deps from MRAN
   # set date here manually
