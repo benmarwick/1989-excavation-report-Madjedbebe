@@ -10,7 +10,7 @@ COPY . /mjb1989excavationpaper
 RUN  . /etc/environment \ 
 
   && apt-get update \
-  && apt-get install jags \
+  && sudo apt-get install r-cran-rjags \
 
   # build this compendium package, get deps from MRAN
   # set date here manually
