@@ -7,11 +7,11 @@ MAINTAINER Ben Marwick <benmarwick@gmail.com>
 COPY . /mjb1989excavationpaper 
 
  # go into the repo directory
-RUN  . /etc/environment \ 
-
-  && apt-get update \
+RUN   apt-get update \
   && sudo apt-get install r-cran-rjags -y \
-
+  
+  && . /etc/environment \ 
+  
   # build this compendium package, get deps from MRAN
   # set date here manually
   && R -e "options(repos='https://mran.microsoft.com/snapshot/2016-11-30'); devtools::install('/mjb1989excavationpaper', dep=TRUE)" \
