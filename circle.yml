@@ -5,7 +5,7 @@ machine:
 dependencies:
   override:
     - docker info
-    - docker build -t benmarwick/mjb1989excavationpaper https://raw.githubusercontent.com/benmarwick/1989-excavation-report-Madjebebe/master/Dockerfile
+    - docker build -t benmarwick/mjb1989excavationpaper .
 test:
   override:
     - docker run --name mjb1989excavationpaper -d -p 8787:8787 benmarwick/mjb1989excavationpaper; sleep 10
