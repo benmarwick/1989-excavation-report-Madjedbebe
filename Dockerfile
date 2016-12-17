@@ -9,7 +9,7 @@ COPY . /mjb1989excavationpaper
 RUN  . /etc/environment \
 
  && ls -alF\
- && pwd \
+ && cd mjb1989excavationpaper && ls -alF \
 
   # build this compendium package, get deps from MRAN
   # set date here manually
