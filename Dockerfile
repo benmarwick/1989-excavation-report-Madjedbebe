@@ -12,7 +12,7 @@ RUN  . /etc/environment \
 
   # build this compendium package, get deps from MRAN
   # set date here manually
-  && R -e "options(repos='https://mran.microsoft.com/snapshot/2016-11-30'); devtools::install('/mjb1989excavationpaper', dep=TRUE)" \
+  && R -e "options(repos='https://mran.microsoft.com/snapshot/2016-11-30'); devtools::install('/mjb1989excavationpaper/', dep=TRUE)" \
 
  # render the manuscript into a docx
   && R -e "rmarkdown::render('/mjb1989excavationpaper/vignettes/analysis-of-dates-lithics-shell-from-1989-excavations.Rmd')"
