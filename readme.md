@@ -1,7 +1,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 [![Last-changedate](https://img.shields.io/badge/last%20change-2016--11--08-brightgreen.svg)](https://github.com/benmarwick/1989-excavation-report-Madjebebe/commits/master) [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.2.4-brightgreen.svg)](https://cran.r-project.org/) [![Licence](https://img.shields.io/github/license/mashape/apistatus.svg)](http://choosealicense.com/licenses/mit/) [![Travis-CI Build Status](https://travis-ci.org/benmarwick/1989-excavation-report-Madjebebe.png?branch=master)](https://travis-ci.org/benmarwick/1989-excavation-report-Madjebebe) [![Circle CI](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/benmarwick/1989-excavation-report-Madjebebe) [![ORCiD](https://img.shields.io/badge/ORCiD-0000--0001--7879--4531-green.svg)](http://orcid.org/0000-0001-7879-4531)
 
-1989-excavation-report-Madjebebe
+1989-excavation-report-Madjedbebe
 ================================
 
 ### Compendium URL
@@ -14,7 +14,7 @@ Ben Marwick (<benmarwick@gmail.com>)
 
 ### Contents
 
-This repository contains the research compendium of our work on the 1989 excavation of Malakanuja II (Madgebebe). The compendium contains all data, code, and text associated with this section of the publication:
+This repository contains the research compendium of our work on the 1989 excavation of Malakanuja II (Madjedbebe). The compendium contains all data, code, and text associated with this section of the publication:
 
 > Clarkson, C., Mike Smith, Ben Marwick, Richard Fullagar, Lynley A. Wallis, Patrick Faulkner, Tiina Manne, Elspeth Hayes, Richard G. Roberts, Zenobia Jacobs, Xavier Carah, Kelsey M. Lowe, Jacqueline Matthews, S. Anna Florin 2015 The archaeology, chronology and stratigraphy of Madjedbebe (Malakunanja II): A site in northern Australia with early occupation. *Journal of Human Evolution* Volume 83, June 2015, Pages 46–64 <http://dx.doi.org/10.1016/j.jhevol.2015.03.014>
 
